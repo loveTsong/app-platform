@@ -6,7 +6,7 @@
 
 package modelengine.jade.store.tool.deploy.service.support;
 
-import static modelengine.jade.carver.tool.ToolSchema.NAME;
+import static modelengine.fel.tool.ToolSchema.NAME;
 import static modelengine.jade.carver.tool.info.schema.PluginSchema.DOT;
 import static modelengine.jade.carver.tool.info.schema.PluginSchema.UNIQUENESS;
 

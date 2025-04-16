@@ -23,8 +23,8 @@
             <artifactId>fit-util</artifactId>
         </dependency>
         <dependency>
-            <groupId>modelengine.fit.jade.fel</groupId>
-            <artifactId>fel-core</artifactId>
+            <groupId>org.fitframework.fel</groupId>
+                <artifactId>fel-core</artifactId>
         </dependency>
 
         <!-- Third-party -->

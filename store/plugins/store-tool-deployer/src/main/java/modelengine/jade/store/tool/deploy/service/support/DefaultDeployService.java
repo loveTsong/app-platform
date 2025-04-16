@@ -9,7 +9,7 @@ package modelengine.jade.store.tool.deploy.service.support;
 import static modelengine.fitframework.broker.GenericableMetadata.DEFAULT_VERSION;
 import static modelengine.fitframework.inspection.Validation.notNull;
 import static modelengine.fitframework.util.ObjectUtils.cast;
-import static modelengine.jade.carver.tool.ToolSchema.PROPERTIES_TYPE;
+import static modelengine.fel.tool.ToolSchema.PROPERTIES_TYPE;
 import static modelengine.jade.carver.tool.info.schema.ToolsSchema.FIT;
 import static modelengine.jade.carver.tool.info.schema.ToolsSchema.FITABLE_ID;
 import static modelengine.jade.carver.tool.info.schema.ToolsSchema.GENERICABLE_ID;

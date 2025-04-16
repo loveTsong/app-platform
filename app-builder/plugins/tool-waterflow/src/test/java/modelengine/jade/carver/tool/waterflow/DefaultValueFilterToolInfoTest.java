@@ -9,7 +9,7 @@ package modelengine.jade.carver.tool.waterflow;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import modelengine.fitframework.util.MapBuilder;
-import modelengine.jade.carver.tool.Tool;
+import modelengine.fel.tool.Tool;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,8 +33,8 @@ import java.util.Map;
  */
 @DisplayName("测试 DefaultValueFilterItemInfo")
 public class DefaultValueFilterToolInfoTest {
-    private Tool.ToolInfo fitToolInfo;
-    private Tool.ToolInfo waterFlowToolInfo;
+    private Tool.Info fitToolInfo;
+    private Tool.Info waterFlowToolInfo;
 
     @BeforeEach
     void setup() throws JsonProcessingException {
@@ -41,10 +42,14 @@ public class DefaultValueFilterToolInfoTest {
         this.waterFlowToolInfo = new DefaultValueFilterToolInfo(this.buildToolInfo(this.buildWaterFlowToolSchema()));
     }
 
-    private Tool.ToolInfo buildToolInfo(Map<String, Object> schema) {
-        return Tool.ToolInfo.custom()
+    private Tool.Info buildToolInfo(Map<String, Object> schema) {
+        return Tool.Info.custom()
                 .name("test_schema_default_implementation_name")
                 .uniqueName("decorator-customize-tool-uuid")
+                .parameters(new HashMap<>())
+                .namespace("")
+                .description("")
+                .extensions(new HashMap<>())
                 .schema(schema)
                 .build();
     }

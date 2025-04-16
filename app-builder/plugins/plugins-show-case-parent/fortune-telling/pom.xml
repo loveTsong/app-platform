@@ -25,8 +25,8 @@
 
         <!-- 插件编译工具 -->
         <dependency>
-            <groupId>modelengine.fit.jade.service</groupId>
-            <artifactId>tool-service</artifactId>
+            <groupId>org.fitframework.fel</groupId>
+            <artifactId>tool-service1</artifactId>
         </dependency>
     </dependencies>
 

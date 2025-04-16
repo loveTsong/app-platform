@@ -13,8 +13,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>agent-test</module>
-        <module>fortune-telling</module>
-        <module>wenjie-data</module>
+<!--        <module>agent-test</module>-->
+<!--        <module>fortune-telling</module>-->
+<!--        <module>wenjie-data</module>-->
     </modules>
 </project>

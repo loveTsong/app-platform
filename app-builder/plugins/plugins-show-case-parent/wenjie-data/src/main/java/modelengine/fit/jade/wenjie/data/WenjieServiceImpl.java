@@ -9,9 +9,9 @@ import modelengine.fitframework.annotation.Fitable;
 import modelengine.fitframework.annotation.Property;
 import modelengine.fitframework.log.Logger;
 import modelengine.fitframework.util.LazyLoader;
-import modelengine.jade.carver.tool.annotation.Attribute;
-import modelengine.jade.carver.tool.annotation.Group;
-import modelengine.jade.carver.tool.annotation.ToolMethod;
+import modelengine.fel.tool.annotation.Attribute;
+import modelengine.fel.tool.annotation.Group;
+import modelengine.fel.tool.annotation.ToolMethod;
 
 import java.io.BufferedReader;
 import java.io.IOException;

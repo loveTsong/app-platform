@@ -6,8 +6,8 @@ package modelengine.fit.jade.wenjie.data;
 
 import modelengine.fitframework.annotation.Genericable;
 import modelengine.fitframework.annotation.Property;
-import modelengine.jade.carver.tool.annotation.Group;
-import modelengine.jade.carver.tool.annotation.ToolMethod;
+import modelengine.fel.tool.annotation.Group;
+import modelengine.fel.tool.annotation.ToolMethod;
 
 import java.util.List;
 

@@ -86,12 +86,12 @@
 
             <!-- WaterFlow -->
             <dependency>
-                <groupId>modelengine.fit.jade.waterflow</groupId>
+                <groupId>org.fitframework.fel</groupId>
                 <artifactId>waterflow-bridge-fit-reactor</artifactId>
                 <version>${waterflow.version}</version>
             </dependency>
             <dependency>
-                <groupId>modelengine.fit.jade.waterflow</groupId>
+                <groupId>org.fitframework.fel</groupId>
                 <artifactId>waterflow-core</artifactId>
                 <version>${waterflow.version}</version>
             </dependency>
@@ -106,7 +106,7 @@
                 <version>${waterflow.version}</version>
             </dependency>
             <dependency>
-                <groupId>modelengine.fit.jade.waterflow</groupId>
+                <groupId>org.fitframework.waterflow</groupId>
                 <artifactId>waterflow-common</artifactId>
                 <version>${waterflow.version}</version>
             </dependency>

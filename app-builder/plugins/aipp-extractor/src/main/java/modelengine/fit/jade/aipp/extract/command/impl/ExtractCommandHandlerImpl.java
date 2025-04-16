@@ -64,6 +64,7 @@ public class ExtractCommandHandlerImpl implements ExtractCommandHandler {
         ChatOption chatOption = ChatOption.custom()
                 .model(command.getModel())
                 .baseUrl(modelAccessInfo.getBaseUrl())
+                .stream(false)
                 .secureConfig(modelAccessInfo.isSystemModel() ? null : SecureConfig.custom().ignoreTrust(true).build())
                 .apiKey(modelAccessInfo.getAccessKey())
                 .temperature(command.getTemperature())

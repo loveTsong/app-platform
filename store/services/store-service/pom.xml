@@ -32,8 +32,13 @@
             <artifactId>jade-common-service</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.fitframework.fel</groupId>
+            <artifactId>tool-service1</artifactId>
+        </dependency>
+        <dependency>
             <groupId>modelengine.fit.jade.service</groupId>
-            <artifactId>tool-service</artifactId>
+            <artifactId>common-service</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
         <!-- Test -->

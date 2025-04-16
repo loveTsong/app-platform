@@ -31,6 +31,7 @@ import modelengine.jade.common.exception.ModelEngineException;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,9 +71,11 @@ public class FunctionCallContentExtractor implements ContentExtractor {
         notNull(variables, "The extracting variables cannot be null");
         String prompt = new DefaultStringTemplate(this.builtinPrompt).render(variables);
         ToolInfo tool = ToolInfo.custom()
+                .namespace("")
                 .name("request_tool")
                 .description("需要执行的函数")
                 .parameters(toJson(outputSchema))
+                .extensions(new HashMap<>())
                 .build();
         ChatOption option = ChatOption.custom(chatOption).stream(false).tools(Collections.singletonList(tool)).build();
         ChatMessages chatMessages = new ChatMessages();

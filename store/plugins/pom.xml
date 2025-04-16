@@ -14,8 +14,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>store-repository-postgresql</module>
+<!--        <module>store-repository-postgresql</module>-->
         <module>store-tool-deployer</module>
-        <module>store-tool-uploader</module>
+<!--        <module>store-tool-uploader</module>-->
     </modules>
 </project>

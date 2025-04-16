@@ -25,8 +25,8 @@
             <artifactId>aipp-prompt-builder-service</artifactId>
         </dependency>
         <dependency>
-            <groupId>modelengine.fit.jade.fel</groupId>
-            <artifactId>fel-core</artifactId>
+            <groupId>org.fitframework.fel</groupId>
+                <artifactId>fel-core</artifactId>
         </dependency>
         <dependency>
             <groupId>modelengine.fit.jade.service</groupId>

@@ -8,7 +8,7 @@ package modelengine.jade.store.service;
 
 import modelengine.fitframework.annotation.Genericable;
 import modelengine.jade.carver.ListResult;
-import modelengine.jade.carver.tool.model.transfer.DefinitionGroupData;
+import modelengine.fel.tool.model.transfer.DefinitionGroupData;
 import modelengine.jade.store.entity.query.ToolQuery;
 import modelengine.jade.store.entity.transfer.StoreToolData;
 

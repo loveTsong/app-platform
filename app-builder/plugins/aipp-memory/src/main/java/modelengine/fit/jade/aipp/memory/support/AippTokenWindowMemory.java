@@ -8,6 +8,7 @@ package modelengine.fit.jade.aipp.memory.support;
 
 import static modelengine.fitframework.inspection.Validation.notNull;
 
+import modelengine.fel.core.chat.ChatMessage;
 import modelengine.fel.core.template.BulkStringTemplate;
 import modelengine.fel.core.tokenizer.Tokenizer;
 import modelengine.fit.jade.aipp.memory.AippChatRound;

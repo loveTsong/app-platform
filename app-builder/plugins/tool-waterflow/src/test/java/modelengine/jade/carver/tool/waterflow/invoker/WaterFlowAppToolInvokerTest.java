@@ -9,7 +9,7 @@ package modelengine.jade.carver.tool.waterflow.invoker;
 import modelengine.fit.jober.aipp.constants.AippConst;
 
 import modelengine.fit.waterflow.entity.FlowErrorInfo;
-import modelengine.jade.carver.tool.model.transfer.ToolData;
+import modelengine.fel.tool.model.transfer.ToolData;
 import modelengine.fel.core.tool.ToolCall;
 import modelengine.fit.jober.common.FlowDataConstant;
 import modelengine.fitframework.exception.FitException;
@@ -69,7 +69,8 @@ class WaterFlowAppToolInvokerTest {
     @Test
     void shouldGetResultWhenInvokeGivenCallbackResponse() {
         String expectResult = "result";
-        ToolCall toolCall = ToolCall.custom().id("toolCallId1").arguments("{\"inputParams\":{}").build();
+        ToolCall toolCall =
+                ToolCall.custom().id("toolCallId1").name("toolName").arguments("{\"inputParams\":{}").build();
         HashMap<String, Object> toolContext = new HashMap<>();
         Mockito.when(this.toolInvoker.invoke(Mockito.argThat(arg -> arg.id().equals(toolCall.id())),
                 Mockito.same(toolContext))).thenAnswer(invocation -> {
@@ -91,7 +92,8 @@ class WaterFlowAppToolInvokerTest {
     @Test
     void shouldThrowExceptionWhenInvokeGivenExceptionResponse() {
         String expectResult = "result";
-        ToolCall tooCall = ToolCall.custom().id("toolCallId1").arguments("{\"inputParams\":{}").build();
+        ToolCall tooCall =
+                ToolCall.custom().id("toolCallId1").name("toolName").arguments("{\"inputParams\":{}").build();
         HashMap<String, Object> toolContext = new HashMap<>();
         Mockito.when(this.toolInvoker.invoke(Mockito.argThat(arg -> arg.id().equals(tooCall.id())),
                 Mockito.same(toolContext))).thenAnswer(invocation -> {
@@ -112,7 +114,8 @@ class WaterFlowAppToolInvokerTest {
 
     @Test
     void shouldThrowExceptionWhenInvokeGivenNoResponse() {
-        ToolCall tooCall = ToolCall.custom().id("toolCallId1").arguments("{\"inputParams\":{}").build();
+        ToolCall tooCall =
+                ToolCall.custom().id("toolCallId1").name("toolName").arguments("{\"inputParams\":{}").build();
         HashMap<String, Object> toolContext = new HashMap<>();
         Mockito.when(this.toolInvoker.invoke(Mockito.argThat(arg -> arg.id().equals(tooCall.id())),
                 Mockito.same(toolContext))).thenAnswer(invocation -> {

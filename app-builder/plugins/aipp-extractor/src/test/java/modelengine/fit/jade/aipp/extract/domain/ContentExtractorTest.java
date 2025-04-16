@@ -72,7 +72,7 @@ public class ContentExtractorTest {
                 .put(Constant.TEXT_KEY, "text")
                 .put(Constant.DESC_KEY, "desc")
                 .put(Constant.HISTORY_KEY, "")
-                .build(), "{}", ChatOption.custom().build());
+                .build(), "{}", ChatOption.custom().model("m").stream(false).build());
         Map<String, String> schema = ObjectUtils.cast(result);
         assertThat(schema).hasFieldOrPropertyWithValue("result", "hello world");
         ChatOption chatOption = chatOptionCaptor.getValue();
@@ -89,10 +89,11 @@ public class ContentExtractorTest {
         ArgumentCaptor<ChatOption> chatOptionCaptor = ArgumentCaptor.forClass(ChatOption.class);
         when(modelService.generate(any(), chatOptionCaptor.capture())).thenReturn(answer);
 
+        ChatOption chatOption = ChatOption.custom().model("m").stream(false).build();
         assertThatThrownBy(() -> extractor.run(MapBuilder.<String, String>get()
                 .put(Constant.TEXT_KEY, "text")
                 .put(Constant.DESC_KEY, "desc")
-                .put(Constant.HISTORY_KEY, "").build(), "{}", ChatOption.custom().build())).isInstanceOf(
+                .put(Constant.HISTORY_KEY, "").build(), "{}", chatOption)).isInstanceOf(
                         ModelEngineException.class)
                 .extracting("code", "message")
                 .containsExactly(ContentExtractRetCode.MODEL_RESPONSE_ERROR.getCode(), "Model respond no message.");
@@ -109,10 +110,11 @@ public class ContentExtractorTest {
         ArgumentCaptor<ChatOption> chatOptionCaptor = ArgumentCaptor.forClass(ChatOption.class);
         when(modelService.generate(any(), chatOptionCaptor.capture())).thenReturn(answer);
 
+        ChatOption chatOption = ChatOption.custom().model("m").stream(false).build();
         assertThatThrownBy(() -> extractor.run(MapBuilder.<String, String>get()
                 .put(Constant.TEXT_KEY, "text")
                 .put(Constant.DESC_KEY, "desc")
-                .put(Constant.HISTORY_KEY, "").build(), "{}", ChatOption.custom().build())).isInstanceOf(
+                .put(Constant.HISTORY_KEY, "").build(), "{}", chatOption)).isInstanceOf(
                         ModelEngineException.class)
                 .extracting("code", "message")
                 .containsExactly(ContentExtractRetCode.TOOLCALL_SIZE_ERROR.getCode(),
@@ -127,10 +129,11 @@ public class ContentExtractorTest {
         ArgumentCaptor<ChatOption> chatOptionCaptor = ArgumentCaptor.forClass(ChatOption.class);
         when(modelService.generate(any(), chatOptionCaptor.capture())).thenReturn(answer);
 
+        ChatOption chatOption = ChatOption.custom().model("m").stream(false).build();
         assertThatThrownBy(() -> extractor.run(MapBuilder.<String, String>get()
                 .put(Constant.TEXT_KEY, "text")
                 .put(Constant.DESC_KEY, "desc")
-                .put(Constant.HISTORY_KEY, "").build(), "{}", ChatOption.custom().build())).isInstanceOf(
+                .put(Constant.HISTORY_KEY, "").build(), "{}", chatOption)).isInstanceOf(
                         ModelEngineException.class)
                 .extracting("code", "message")
                 .containsExactly(ContentExtractRetCode.TOOLCALL_SIZE_ERROR.getCode(),
@@ -148,10 +151,11 @@ public class ContentExtractorTest {
         ArgumentCaptor<ChatOption> chatOptionCaptor = ArgumentCaptor.forClass(ChatOption.class);
         when(modelService.generate(any(), chatOptionCaptor.capture())).thenReturn(answer);
 
+        ChatOption chatOption = ChatOption.custom().model("m").stream(false).build();
         assertThatThrownBy(() -> extractor.run(MapBuilder.<String, String>get()
                 .put(Constant.TEXT_KEY, "text")
                 .put(Constant.DESC_KEY, "desc")
-                .put(Constant.HISTORY_KEY, "").build(), "{}", ChatOption.custom().build())).isInstanceOf(
+                .put(Constant.HISTORY_KEY, "").build(), "{}", chatOption)).isInstanceOf(
                         ModelEngineException.class)
                 .extracting("code", "message")
                 .containsExactly(ContentExtractRetCode.DESERIALIZE_ERROR.getCode(),

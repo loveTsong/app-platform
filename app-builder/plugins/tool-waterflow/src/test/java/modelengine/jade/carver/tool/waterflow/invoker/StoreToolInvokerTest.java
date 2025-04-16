@@ -6,8 +6,8 @@
 
 package modelengine.jade.carver.tool.waterflow.invoker;
 
-import modelengine.jade.carver.tool.model.transfer.ToolData;
-import modelengine.jade.carver.tool.service.ToolExecuteService;
+import modelengine.fel.tool.model.transfer.ToolData;
+import modelengine.fel.tool.service.ToolExecuteService;
 
 import modelengine.fel.core.tool.ToolCall;
 
@@ -58,7 +58,7 @@ class StoreToolInvokerTest {
     @Test
     void shouldCallToolExecuteServiceWhenInvoke() {
         String arguments = "{\"inputParams\":{}";
-        ToolCall tooCall = ToolCall.custom().name("toolName").arguments(arguments).build();
+        ToolCall tooCall = ToolCall.custom().name("toolName").id("id").arguments(arguments).build();
         String expectResult = "result";
         Mockito.when(this.toolExecuteService.execute(tooCall.name(), arguments)).thenReturn(expectResult);
 

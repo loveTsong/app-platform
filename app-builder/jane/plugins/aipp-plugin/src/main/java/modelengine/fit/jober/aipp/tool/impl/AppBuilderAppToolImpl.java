@@ -6,9 +6,9 @@
 
 package modelengine.fit.jober.aipp.tool.impl;
 
-import modelengine.fel.core.formatters.OutputParser;
-import modelengine.fel.core.formatters.json.JsonOutputParser;
-import modelengine.fel.core.formatters.support.MarkdownParser;
+import modelengine.fel.core.format.OutputParser;
+import modelengine.fel.core.format.json.JsonOutputParser;
+import modelengine.fel.core.format.MarkdownCompatibleParser;
 import modelengine.fit.jane.common.entity.OperationContext;
 import modelengine.fit.jober.aipp.common.exception.AippException;
 import modelengine.fit.jober.aipp.dto.AppBuilderAppCreateDto;
@@ -82,7 +82,7 @@ public class AppBuilderAppToolImpl implements AppBuilderAppTool {
     public String createApp(String appInfo, String userId) {
         AppCreateToolDto dto;
         try {
-            OutputParser<AppCreateToolDto> parser = new MarkdownParser<>(
+            OutputParser<AppCreateToolDto> parser = new MarkdownCompatibleParser<>(
                     JsonOutputParser.create(this.objectSerializer, AppCreateToolDto.class), "json");
             dto = parser.parse(appInfo);
         } catch (SerializationException exception) {

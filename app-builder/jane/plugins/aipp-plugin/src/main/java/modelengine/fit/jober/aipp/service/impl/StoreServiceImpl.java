@@ -20,7 +20,7 @@ import modelengine.jade.store.service.HuggingFaceModelService;
 import modelengine.jade.store.service.PluginToolService;
 
 import modelengine.jade.carver.ListResult;
-import modelengine.jade.carver.tool.model.transfer.ToolData;
+import modelengine.fel.tool.model.transfer.ToolData;
 import modelengine.fit.jane.common.entity.OperationContext;
 import modelengine.fit.jober.aipp.constants.AippConst;
 import modelengine.fit.jober.aipp.dto.AppBuilderWaterFlowInfoDto;

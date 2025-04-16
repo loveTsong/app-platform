@@ -17,7 +17,7 @@ import modelengine.fel.core.chat.support.ChatMessages;
 import modelengine.fel.core.chat.support.ToolMessage;
 import modelengine.fel.core.model.http.SecureConfig;
 import modelengine.fel.core.tool.ToolInfo;
-import modelengine.fel.core.tool.ToolProvider;
+// import modelengine.fel.core.tool.ToolProvider;
 import modelengine.fel.core.util.Tip;
 import modelengine.fel.engine.flows.AiFlows;
 import modelengine.fel.engine.flows.AiProcessFlow;
@@ -115,9 +115,9 @@ public class LlmComponent implements FlowableService, FlowCallbackService, FlowE
 
     private final MetaInstanceService metaInstanceService;
 
-    private final ToolProvider toolProvider;
+    // private final ToolProvider toolProvider;
 
-    private final AiProcessFlow<Tip, Prompt> agentFlow;
+    private final AiProcessFlow<Tip, ChatMessage> agentFlow;
 
     private final AippLogService aippLogService;
 
@@ -150,14 +150,14 @@ public class LlmComponent implements FlowableService, FlowCallbackService, FlowE
      * @param promptBuilderChain 表示提示器构造器职责链的 {@link PromptBuilderChain}。
      */
     public LlmComponent(FlowInstanceService flowInstanceService, MetaInstanceService metaInstanceService,
-            ToolProvider toolProvider,
-            @Fit(alias = AippConst.WATER_FLOW_AGENT_BEAN) AbstractAgent<Prompt, Prompt> agent,
+            // ToolProvider toolProvider,
+            @Fit(alias = AippConst.WATER_FLOW_AGENT_BEAN) AbstractAgent agent,
             AippLogService aippLogService, AippLogStreamService aippLogStreamService, BrokerClient client,
             @Fit(alias = "json") ObjectSerializer serializer, LocaleService localeService,
             AippModelCenter aippModelCenter, PromptBuilderChain promptBuilderChain) {
         this.flowInstanceService = flowInstanceService;
         this.metaInstanceService = metaInstanceService;
-        this.toolProvider = toolProvider;
+        // this.toolProvider = toolProvider;
         this.aippLogService = aippLogService;
         this.aippLogStreamService = aippLogStreamService;
         this.client = client;
@@ -169,6 +169,7 @@ public class LlmComponent implements FlowableService, FlowCallbackService, FlowE
                 .prompt(Prompts.sys(SYSTEM_PROMPT), Prompts.history(), Prompts.human(PROMPT_TEMPLATE))
                 .id(AGENT_NODE_ID)
                 .delegate(agent)
+                // .map(input -> ) // 这里需要进行类型转换
                 .close();
         this.localeService = localeService;
         this.promptBuilderChain = promptBuilderChain;
@@ -211,7 +212,7 @@ public class LlmComponent implements FlowableService, FlowCallbackService, FlowE
                 new StreamMsgSender(this.aippLogStreamService, this.serializer, path, msgId, parentInstanceId);
         agentFlow.converse()
                 .bind((acc, chunk) -> streamMsgSender.sendMsg(chunk.text(), childBusinessData))
-                .doOnSuccess(msg -> llmOutputConsumer(llmMeta, ObjectUtils.cast(msg), promptMetadata))
+                .doOnConsume(msg -> llmOutputConsumer(llmMeta, ObjectUtils.cast(msg), promptMetadata))
                 .doOnError(throwable -> doOnAgentError(llmMeta,
                         throwable.getCause() == null ? throwable.getMessage() : throwable.getCause().getMessage()))
                 .offer(AGENT_NODE_ID, Collections.singletonList(chatMessages));
@@ -230,7 +231,8 @@ public class LlmComponent implements FlowableService, FlowCallbackService, FlowE
             return;
         }
         String toolUniqueName = ObjectUtils.cast(businessData.get(TOOL_UNIQUE_NAME));
-        List<ToolInfo> toolInfoList = this.toolProvider.getTool(Collections.singletonList(toolUniqueName));
+        List<ToolInfo> toolInfoList = new ArrayList<>();
+        // List<ToolInfo> toolInfoList = this.toolProvider.getTool(Collections.singletonList(toolUniqueName));
         String toolName = toolInfoList.isEmpty()
                 ? toolUniqueName
                 : ObjectUtils.cast(toolInfoList.get(0).parameters().getOrDefault(TOOL_NAME, toolUniqueName));
@@ -285,6 +287,7 @@ public class LlmComponent implements FlowableService, FlowCallbackService, FlowE
                 new StreamMsgSender(this.aippLogStreamService, this.serializer, path, msgId, instId);
         streamMsgSender.sendKnowledge(promptMessage.getMetadata(), businessData);
         agentFlow.converse()
+                // 这个bind看起来使用reduce功能即可替代？
                 .bind((acc, chunk) -> {
                     if (firstTokenFlag[0]) {
                         log.info("[perf] [{}] converse sendLog start, instId={}, chunk={}",
@@ -300,7 +303,7 @@ public class LlmComponent implements FlowableService, FlowCallbackService, FlowE
                 })
                 .bind(new AippMemory(this.getMemoriesByMaxRounds(businessData)))
                 .bind(AippConst.TOOL_CONTEXT_KEY, toolContext)
-                .doOnSuccess(msg -> llmOutputConsumer(llmMeta, msg, promptMessage.getMetadata()))
+                .doOnConsume(msg -> llmOutputConsumer(llmMeta, msg, promptMessage.getMetadata()))
                 .doOnError(throwable -> doOnAgentError(llmMeta,
                         throwable.getCause() == null ? throwable.getMessage() : throwable.getCause().getMessage()))
                 .bind(buildChatOptions(businessData))
@@ -553,8 +556,8 @@ public class LlmComponent implements FlowableService, FlowCallbackService, FlowE
                 .secureConfig(modelAccessInfo.isSystemModel() ? null : SecureConfig.custom().ignoreTrust(true).build())
                 .apiKey(modelAccessInfo.getAccessKey())
                 .temperature(ObjectUtils.cast(businessData.get("temperature")))
-                .tools(this.toolProvider.getTool(skillNameList))
-                .user(opContext.getOperator())
+                // .tools(this.toolProvider.getTool(skillNameList))
+                // .user(opContext.getOperator())
                 .build();
     }
 

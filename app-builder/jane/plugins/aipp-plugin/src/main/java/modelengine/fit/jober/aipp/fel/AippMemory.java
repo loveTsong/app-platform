@@ -39,7 +39,17 @@ public class AippMemory implements Memory {
     }
 
     @Override
-    public void add(ChatMessage question, ChatMessage answer) {
+    public void add(ChatMessage message) {
+    }
+
+    @Override
+    public void set(List<ChatMessage> messages) {
+
+    }
+
+    @Override
+    public void clear() {
+
     }
 
     @Override
