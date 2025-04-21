@@ -255,6 +255,19 @@ public class AippRunTimeServiceImpl
                 .get("flow_trans_id");
     }
 
+    @Override
+    public Boolean isInstanceRunning(String instanceId, OperationContext context) {
+        String versionId = this.metaInstanceService.getMetaVersionId(instanceId);
+
+        Instance instDetail = MetaInstanceUtils.getInstanceDetail(versionId, instanceId, context, metaInstanceService);
+        Map<String, String> instInfo = instDetail.getInfo();
+        if (!instInfo.containsKey(AippConst.INST_STATUS_KEY)) {
+            return false;
+        }
+        return MetaInstStatusEnum.getMetaInstStatus(instInfo.get(AippConst.INST_STATUS_KEY))
+                == MetaInstStatusEnum.RUNNING;
+    }
+
     /**
      * 启动一个运行Aipp
      *
