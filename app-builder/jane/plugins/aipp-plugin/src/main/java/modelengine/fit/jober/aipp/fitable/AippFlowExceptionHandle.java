@@ -80,7 +80,7 @@ public class AippFlowExceptionHandle implements FlowExceptionService {
         Instance instance = MetaInstanceUtils.getInstanceDetailByInstanceId(aippInstId, null, this.metaInstanceService);
         String instanceStatus = instance.getInfo().get(AippConst.INST_STATUS_KEY);
         if (MetaInstStatusEnum.TERMINATED.name().equals(instanceStatus)) {
-            log.debug("Aipp instance is already terminated, aippInstId={}.", aippInstId);
+            log.debug("Aipp instance is already terminated. [aippInstId={}]", aippInstId);
             return;
         }
         List<AippInstLog> instLogs = this.aippLogService.queryInstanceLogSince(aippInstId, null);

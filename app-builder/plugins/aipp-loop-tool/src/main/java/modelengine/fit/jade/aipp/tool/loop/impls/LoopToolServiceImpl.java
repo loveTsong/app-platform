@@ -61,7 +61,7 @@ public class LoopToolServiceImpl implements LoopToolService {
     private final Cache<String, Boolean> aippInstanceStatusCache;
 
     public LoopToolServiceImpl(ToolCallService toolCallService, AippRunTimeService aippRunTimeService,
-            @Value("${loop-call.cache.duration:30000}") Integer cacheDuration) {
+            @Value("${loop-call.cache.duration}") Integer cacheDuration) {
         this.toolCallService = toolCallService;
         this.aippRunTimeService = aippRunTimeService;
         this.aippInstanceStatusCache = Caffeine.newBuilder()
@@ -107,7 +107,6 @@ public class LoopToolServiceImpl implements LoopToolService {
 
     private List<Object> loopCall(Map<String, Object> loopArgs, ToolInfo toolInfo, List<?> loopData,
             Map<String, Object> lastMap, String lastKey, Map<String, Object> context) {
-        // 循环展开的参数，通过序列化的方式复制，防止同进程调用场景下，直接返回时，多条数据的覆盖污染问题
         String aippInstanceId = ObjectUtils.cast(ObjectUtils.nullIf(context, new HashMap<>())
                 .getOrDefault(AippConst.CONTEXT_INSTANCE_ID, StringUtils.EMPTY));
         List<Object> list = new ArrayList<>();
@@ -121,7 +120,7 @@ public class LoopToolServiceImpl implements LoopToolService {
             Object apply = this.toolCallService.call(toolInfo.getUniqueName(), args);
             list.add(apply);
             if (StringUtils.isNotEmpty(aippInstanceId) && !this.isInstanceRunning(aippInstanceId)) {
-                throw new IllegalStateException("Already terminated.");
+                throw new IllegalStateException(StringUtils.format("{0} is already terminated.", aippInstanceId));
             }
         }
         return list;

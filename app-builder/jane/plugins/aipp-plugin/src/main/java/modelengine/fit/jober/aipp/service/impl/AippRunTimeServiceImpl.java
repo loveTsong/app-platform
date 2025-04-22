@@ -256,6 +256,7 @@ public class AippRunTimeServiceImpl
     }
 
     @Override
+    @Fitable("default")
     public Boolean isInstanceRunning(String instanceId, OperationContext context) {
         String versionId = this.metaInstanceService.getMetaVersionId(instanceId);
 
