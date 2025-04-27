@@ -26,9 +26,10 @@ import modelengine.jade.carver.tool.annotation.Attribute;
 import modelengine.jade.carver.tool.annotation.Group;
 import modelengine.jade.carver.tool.annotation.ToolMethod;
 
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 并行工具调用节点服务接口的实现。
@@ -77,21 +78,23 @@ public class ParallelToolServiceImpl implements ParallelToolService {
         BatchRequest batchRequest =
                 new BatchRequest(toolCalls, this.getConfig(config), this.syncToolCall, this.taskExecutor);
         batchRequest.post();
-        List<Object> response = batchRequest.await();
-        Map<String, Object> result = new LinkedHashMap<>();
-        for (int i = 0; i < response.size(); ++i) {
-            result.put(Integer.toString(i), response.get(i));
-        }
-        return result;
+        return batchRequest.await();
     }
 
     private boolean isValidToolCalls(List<ToolCall> toolCalls) {
-        return !(CollectionUtils.isEmpty(toolCalls) || toolCalls.stream()
-                .anyMatch(toolCall -> toolCall == null || !this.isValidArgs(toolCall.getArgs())));
+        return !CollectionUtils.isEmpty(toolCalls) && this.isValidOutputName(toolCalls) && toolCalls.stream()
+                .noneMatch(toolCall -> toolCall == null || !this.isValidArgs(toolCall.getArgs()));
     }
 
     private boolean isValidArgs(List<Argument> args) {
         return !(args == null || args.stream().anyMatch(arg -> arg == null || StringUtils.isEmpty(arg.getName())));
+    }
+
+    private boolean isValidOutputName(List<ToolCall> toolCalls) {
+        Set<String> hitSet = new HashSet<>();
+        return toolCalls.stream()
+                .map(ToolCall::getOutputName)
+                .allMatch(outputName -> StringUtils.isNotEmpty(outputName) && hitSet.add(outputName));
     }
 
     private Config getConfig(Config config) {

@@ -26,4 +26,5 @@ import java.util.List;
 public class ToolCall {
     private String uniqueName;
     private List<Argument> args;
+    private String outputName;
 }

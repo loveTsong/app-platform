@@ -21,8 +21,7 @@ import modelengine.fit.jade.tool.SyncToolCall;
 import modelengine.fitframework.log.Logger;
 import modelengine.fitframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,7 @@ public class BatchRequest {
     private final Map<Integer, ToolCallTask> doingToolCallTasks = new ConcurrentHashMap<>();
 
     @Getter
-    private final List<Object> results;
+    private final Map<String, Object> results;
 
     private int waitOutputCount;
 
@@ -69,8 +68,8 @@ public class BatchRequest {
                 .index(this.undoToolCallTasks.size())
                 .toolCall(toolCall)
                 .build()));
-        this.results = new ArrayList<>(Arrays.asList(new Object[this.undoToolCallTasks.size()]));
-        this.waitOutputCount = this.results.size();
+        this.results = new LinkedHashMap<>();
+        this.waitOutputCount = this.undoToolCallTasks.size();
         this.syncToolCall = syncToolCall;
         this.config = config;
         this.taskExecutor = taskExecutor;
@@ -138,7 +137,7 @@ public class BatchRequest {
      * @return 表示工具执行结果的 {@link List}{@code <}{@link Object}{@code >}。
      * @throws IllegalStateException 当有工具调用失败/中断时。
      */
-    public List<Object> await() {
+    public Map<String, Object> await() {
         try {
             this.countDownLatch.await();
         } catch (InterruptedException e) {
@@ -166,7 +165,7 @@ public class BatchRequest {
                 task.getIndex());
 
         synchronized (this.results) {
-            this.results.set(task.getIndex(), result);
+            this.results.put(task.getToolCall().getOutputName(), result);
             this.waitOutputCount--;
             if (this.waitOutputCount == 0) {
                 this.countDownLatch.countDown();

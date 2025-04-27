@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
 class BatchRequestTest {
@@ -51,11 +52,13 @@ class BatchRequestTest {
 
     @Test
     void shouldGetResultWhenAwaitGivenToolCallSuccessfully() {
-        List<ToolCall> toolCalls = Arrays.asList(ToolCall.builder().uniqueName("u1").args(new ArrayList<>()).build(),
-                ToolCall.builder()
-                        .uniqueName("u2")
-                        .args(Collections.singletonList(Argument.builder().name("a").value(1).build()))
-                        .build());
+        List<ToolCall> toolCalls =
+                Arrays.asList(ToolCall.builder().uniqueName("u1").args(new ArrayList<>()).outputName("1").build(),
+                        ToolCall.builder()
+                                .uniqueName("u2")
+                                .args(Collections.singletonList(Argument.builder().name("a").value(1).build()))
+                                .outputName("2")
+                                .build());
         Config config = Config.builder().concurrency(1).build();
         Mockito.doAnswer((Answer<Void>) invocation -> {
             Runnable runnable = invocation.getArgument(0);
@@ -69,14 +72,14 @@ class BatchRequestTest {
 
         BatchRequest batchRequest = new BatchRequest(toolCalls, config, this.syncToolCall, this.taskExecutor);
         batchRequest.post();
-        List<Object> result = batchRequest.await();
+        Map<String, Object> result = batchRequest.await();
 
         Mockito.verify(this.taskExecutor, Mockito.times(toolCalls.size())).post(Mockito.any());
         Assertions.assertEquals(toolCalls.size(), result.size());
-        Assertions.assertInstanceOf(Integer.class, result.get(0));
-        Assertions.assertEquals(1, result.get(0));
-        Assertions.assertInstanceOf(String.class, result.get(1));
-        Assertions.assertEquals("2", result.get(1));
+        Assertions.assertInstanceOf(Integer.class, result.get(toolCalls.get(0).getOutputName()));
+        Assertions.assertEquals(1, result.get(toolCalls.get(0).getOutputName()));
+        Assertions.assertInstanceOf(String.class, result.get(toolCalls.get(1).getOutputName()));
+        Assertions.assertEquals("2", result.get(toolCalls.get(1).getOutputName()));
     }
 
     @Test
