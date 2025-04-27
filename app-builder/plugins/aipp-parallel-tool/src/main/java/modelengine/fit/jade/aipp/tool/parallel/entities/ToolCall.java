@@ -21,8 +21,9 @@ import java.util.List;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ToolCall {
     private String uniqueName;
     private List<Argument> args;
-    private Boolean useOutput;
 }
