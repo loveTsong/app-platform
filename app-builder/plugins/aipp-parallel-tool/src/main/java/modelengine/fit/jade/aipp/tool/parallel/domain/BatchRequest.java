@@ -16,6 +16,7 @@ import lombok.Getter;
 import modelengine.fit.jade.aipp.tool.parallel.entities.Argument;
 import modelengine.fit.jade.aipp.tool.parallel.entities.Config;
 import modelengine.fit.jade.aipp.tool.parallel.entities.ToolCall;
+import modelengine.fit.jade.aipp.tool.parallel.support.AippInstanceStatus;
 import modelengine.fit.jade.aipp.tool.parallel.support.TaskExecutor;
 import modelengine.fit.jade.tool.SyncToolCall;
 import modelengine.fitframework.log.Logger;
@@ -47,7 +48,7 @@ public class BatchRequest {
     private final Map<Integer, ToolCallTask> doingToolCallTasks = new ConcurrentHashMap<>();
 
     @Getter
-    private final Map<String, Object> results;
+    private final Map<String, Object> results = new LinkedHashMap<>();
 
     private int waitOutputCount;
 
@@ -63,16 +64,22 @@ public class BatchRequest {
 
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    public BatchRequest(List<ToolCall> toolCalls, Config config, SyncToolCall syncToolCall, TaskExecutor taskExecutor) {
+    private final AippInstanceStatus aippInstanceStatus;
+
+    private final Map<String, Object> context;
+
+    public BatchRequest(List<ToolCall> toolCalls, Config config, SyncToolCall syncToolCall, TaskExecutor taskExecutor,
+            AippInstanceStatus aippInstanceStatus, Map<String, Object> context) {
         toolCalls.forEach(toolCall -> undoToolCallTasks.add(ToolCallTask.builder()
                 .index(this.undoToolCallTasks.size())
                 .toolCall(toolCall)
                 .build()));
-        this.results = new LinkedHashMap<>();
         this.waitOutputCount = this.undoToolCallTasks.size();
         this.syncToolCall = syncToolCall;
         this.config = config;
         this.taskExecutor = taskExecutor;
+        this.aippInstanceStatus = aippInstanceStatus;
+        this.context = context;
     }
 
     /**
@@ -91,18 +98,30 @@ public class BatchRequest {
     }
 
     private boolean postUndoTask() {
+        ToolCallTask task;
         synchronized (this.undoToolCallTasks) {
             if (this.undoToolCallTasks.isEmpty()) {
                 return false;
             }
-            ToolCallTask task = this.undoToolCallTasks.poll();
-            this.taskExecutor.post(() -> {
-                if (hasException()) {
-                    LOG.warn("Ignore the tool call, because the batch request has exception. [batchId={}, "
-                                    + "toolUniqueName={}, index={}]",
+            task = this.undoToolCallTasks.poll();
+        }
+        this.taskExecutor.post(() -> {
+            if (this.hasException()) {
+                LOG.warn("Ignore the tool call, because the batch request has exception. [batchId={}, "
+                        + "toolUniqueName={}, index={}]", this.id, task.getToolCall().getUniqueName(), task.getIndex());
+                return;
+            }
+            try {
+                if (!this.aippInstanceStatus.isRunning(this.context)) {
+                    LOG.warn("Ignore the tool call, because the batch request is not running. [batchId={}, "
+                                    + "toolUniqueName={}, index={}, context={}]",
                             this.id,
                             task.getToolCall().getUniqueName(),
-                            task.getIndex());
+                            task.getIndex(),
+                            this.context.toString());
+                    this.setException(task,
+                            new IllegalStateException(StringUtils.format("The instance is not running. [context={0}]",
+                                    this.context.toString())));
                     return;
                 }
                 LOG.info("Start calling the tool. [batchId={}, toolUniqueName={}, index={}]",
@@ -110,24 +129,21 @@ public class BatchRequest {
                         task.getToolCall().getUniqueName(),
                         task.getIndex());
 
-                try {
-                    this.doingToolCallTasks.put(task.getIndex(), task);
-                    Map<String, Object> toolArgs = task.getToolCall()
-                            .getArgs()
-                            .stream()
-                            .collect(Collectors.toMap(Argument::getName, Argument::getValue));
-                    this.complete(task,
-                            JSONArray.parse(this.syncToolCall.call(task.getToolCall().getUniqueName(),
-                                    JSONObject.toJSONString(toolArgs, SerializerFeature.WriteMapNullValue))));
-                } catch (Throwable ex) {
-                    setException(task, ex);
-                } finally {
-                    this.doingToolCallTasks.remove(task.getIndex());
-                }
+                this.doingToolCallTasks.put(task.getIndex(), task);
+                Map<String, Object> toolArgs = task.getToolCall()
+                        .getArgs()
+                        .stream()
+                        .collect(Collectors.toMap(Argument::getName, Argument::getValue));
+                this.complete(task,
+                        JSONArray.parse(this.syncToolCall.call(task.getToolCall().getUniqueName(),
+                                JSONObject.toJSONString(toolArgs, SerializerFeature.WriteMapNullValue))));
+            } catch (Throwable ex) {
+                this.setException(task, ex);
+            } finally {
+                this.doingToolCallTasks.remove(task.getIndex());
+            }
 
-            });
-        }
-
+        });
         return true;
     }
 
@@ -141,9 +157,9 @@ public class BatchRequest {
         try {
             this.countDownLatch.await();
         } catch (InterruptedException e) {
-            throw new IllegalStateException(exception.getMessage(), exception);
+            throw new IllegalStateException(this.exception.getMessage(), this.exception);
         }
-        if (hasException()) {
+        if (this.hasException()) {
             throw new IllegalStateException(StringUtils.format(
                     "Failed to call the tool. [batchId={0}, uniqueName={1}, index={2}, errorMessage={3}]",
                     this.id,

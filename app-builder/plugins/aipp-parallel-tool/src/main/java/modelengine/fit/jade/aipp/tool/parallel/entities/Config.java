@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
  * 并行工具调用的配置。
  *
  * @author 宋永坦
- * @since 2025/4/23
+ * @since 2025-04-23
  */
 @Data
 @Builder

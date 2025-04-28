@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Technologies Co., Ltd. All rights reserved.
+ * Copyright (c) 2025 Huawei Technologies Co., Ltd. All rights reserved.
  * This file is a part of the ModelEngine Project.
  * Licensed under the MIT License. See License.txt in the project root for license information.
  */
@@ -32,7 +32,7 @@ public interface ParallelToolService {
      * @param context 表示调用上下文的 {@link Map}{@code <}{@link String}{@code , }{@link Object}{@code >}。
      * @return 表示调用工具列表的返回值的 {@link Map}{@code <}{@link String}{@code , }{@link Object}{@code >}。
      */
-    @ToolMethod(name = "parallelTool", description = "用于循环执行工具")
+    @ToolMethod(name = "parallelTool", description = "用于并行执行工具")
     @Genericable("modelengine.fit.jade.aipp.tool.parallel")
     Map<String, Object> call(@Property(description = "并行调用的工具列表", required = true) List<ToolCall> toolCalls,
             @Property(description = "并行调用的配置") Config config,
