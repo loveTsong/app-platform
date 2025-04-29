@@ -6,8 +6,6 @@
 
 package modelengine.fit.jade.aipp.tool.parallel.domain;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import modelengine.fit.jade.aipp.tool.parallel.entities.Argument;
 import modelengine.fit.jade.aipp.tool.parallel.entities.Config;
 import modelengine.fit.jade.aipp.tool.parallel.entities.ToolCall;
@@ -119,7 +117,7 @@ class BatchRequestTest {
                 this.aippInstanceStatus,
                 null);
         batchRequest.post();
-        IllegalStateException exception = assertThrows(IllegalStateException.class, batchRequest::await);
+        IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class, batchRequest::await);
 
         Assertions.assertTrue(exception.getMessage().endsWith("uniqueName=u1, index=0, errorMessage=wrong argument]"));
     }
@@ -145,7 +143,7 @@ class BatchRequestTest {
                 this.aippInstanceStatus,
                 context);
         batchRequest.post();
-        IllegalStateException exception = assertThrows(IllegalStateException.class, batchRequest::await);
+        IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class, batchRequest::await);
 
         Mockito.verify(this.taskExecutor, Mockito.times(2)).post(Mockito.any());
         Mockito.verify(this.syncToolCall, Mockito.times(1)).call(Mockito.any(), Mockito.any());

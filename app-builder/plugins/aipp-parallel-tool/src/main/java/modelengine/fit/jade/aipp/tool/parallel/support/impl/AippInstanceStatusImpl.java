@@ -31,12 +31,10 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class AippInstanceStatusImpl implements AippInstanceStatus {
     private static final String DEFAULT_OPERATOR = "Jade";
+    private static final OperationContext operationContext;
 
     private final Cache<String, Boolean> statusCache;
-
     private final AippRunTimeService aippRunTimeService;
-
-    private static final OperationContext operationContext;
 
     static {
         operationContext = new OperationContext();
@@ -52,7 +50,7 @@ public class AippInstanceStatusImpl implements AippInstanceStatus {
     public boolean isRunning(Map<String, Object> context) {
         String aippInstanceId = ObjectUtils.cast(ObjectUtils.nullIf(context, new HashMap<>())
                 .getOrDefault(AippConst.CONTEXT_INSTANCE_ID, StringUtils.EMPTY));
-        if (StringUtils.isEmpty(aippInstanceId)) {
+        if (StringUtils.isBlank(aippInstanceId)) {
             // 如果上下文中不传入该值，则认为不需要根据实例状态控制退出。
             return true;
         }

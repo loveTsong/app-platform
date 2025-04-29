@@ -40,17 +40,12 @@ import java.util.Set;
 @Group(name = "ParallelToolImpl")
 public class ParallelToolServiceImpl implements ParallelToolService {
     private static final Logger LOG = Logger.get(ParallelToolServiceImpl.class);
-
     private static final int MIN_CONCURRENCY = 1;
-
     private static final int MAX_CONCURRENCY = 32;
 
     private final SyncToolCall syncToolCall;
-
     private final TaskExecutor taskExecutor;
-
     private final Config defaultConfig;
-
     private final AippInstanceStatus aippInstanceStatus;
 
     public ParallelToolServiceImpl(@Fit SyncToolCall syncToolCall, TaskExecutor taskExecutor,
@@ -127,8 +122,8 @@ public class ParallelToolServiceImpl implements ParallelToolService {
             return this.defaultConfig;
         }
         if (config.getConcurrency() < MIN_CONCURRENCY || config.getConcurrency() > MAX_CONCURRENCY) {
-            LOG.warn("The given concurrency is illegal, it should between 1 and 32, use default config instead. "
-                    + "[concurrency={}]", config.getConcurrency());
+            LOG.warn("The given concurrency is illegal, it should between {} and {}, use default config instead. "
+                    + "[concurrency={}]", MIN_CONCURRENCY, MAX_CONCURRENCY, config.getConcurrency());
             return this.defaultConfig;
         }
         return config;

@@ -42,30 +42,18 @@ public class BatchRequest {
     private static final Logger LOG = Logger.get(BatchRequest.class);
 
     private final String id = UUID.randomUUID().toString();
-
     private final Queue<ToolCallTask> undoToolCallTasks = new LinkedList<>();
-
     private final Map<Integer, ToolCallTask> doingToolCallTasks = new ConcurrentHashMap<>();
-
     @Getter
     private final Map<String, Object> results = new LinkedHashMap<>();
-
-    private int waitOutputCount;
-
-    private Throwable exception = null;
-
-    private ToolCallTask exceptionToolCallTask = null;
-
+    private volatile int waitOutputCount;
+    private volatile Throwable exception = null;
+    private volatile ToolCallTask exceptionToolCallTask = null;
     private final Config config;
-
     private final SyncToolCall syncToolCall;
-
     private final TaskExecutor taskExecutor;
-
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
-
     private final AippInstanceStatus aippInstanceStatus;
-
     private final Map<String, Object> context;
 
     public BatchRequest(List<ToolCall> toolCalls, Config config, SyncToolCall syncToolCall, TaskExecutor taskExecutor,
@@ -91,12 +79,17 @@ public class BatchRequest {
                 this.config.getConcurrency(),
                 this.dumpyUndoToolUniqueNames());
         for (int i = 0; i < this.config.getConcurrency(); ++i) {
-            if (!postUndoTask()) {
+            if (!this.postUndoTask()) {
                 break;
             }
         }
     }
 
+    /**
+     * 投递未执行的任务。
+     *
+     * @return 表示是否有任务投递的 {@code boolean}。
+     */
     private boolean postUndoTask() {
         ToolCallTask task;
         synchronized (this.undoToolCallTasks) {
@@ -148,7 +141,7 @@ public class BatchRequest {
     }
 
     /**
-     * 等待该批工具的完成。
+     * 等待该批工具的完成，并返回结果。
      *
      * @return 表示工具执行结果的 {@link List}{@code <}{@link Object}{@code >}。
      * @throws IllegalStateException 当有工具调用失败/中断时。

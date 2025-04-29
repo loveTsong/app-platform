@@ -29,11 +29,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class DefaultTaskExecutor implements TaskExecutor {
     private static final Logger LOG = Logger.get(BatchRequest.class);
-
     private static final int MIN_THREAD_POOL_SIZE = 1;
-
     private static final int MAX_THREAD_POOL_SIZE = 128;
-
     private static final int MIN_THREAD_CORE_SIZE = 0;
 
     private final ExecutorService executorService;
@@ -58,9 +55,7 @@ public class DefaultTaskExecutor implements TaskExecutor {
                 TimeUnit.MINUTES,
                 new SynchronousQueue<>(),
                 new DefaultThreadFactory("parallel-tool", false, (thread, throwable) -> {
-                    LOG.error("[parallel-tool] Thread exception. [cause={}, message={}]",
-                            throwable.getCause(),
-                            throwable.getMessage());
+                    LOG.error("[parallel-tool] Exception. [message={}]", throwable.getMessage());
                     LOG.error("[parallel-tool] Details:", throwable);
                 }),
                 new ThreadPoolExecutor.CallerRunsPolicy());
@@ -68,6 +63,6 @@ public class DefaultTaskExecutor implements TaskExecutor {
 
     @Override
     public void post(Runnable runnable) {
-        executorService.execute(runnable);
+        this.executorService.execute(runnable);
     }
 }
