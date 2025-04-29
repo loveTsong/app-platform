@@ -28,6 +28,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * {@link BatchRequest} 的测试类。
+ *
+ * @author 宋永坦
+ * @since 2025-04-29
+ */
 @ExtendWith(MockitoExtension.class)
 class BatchRequestTest {
     @Mock

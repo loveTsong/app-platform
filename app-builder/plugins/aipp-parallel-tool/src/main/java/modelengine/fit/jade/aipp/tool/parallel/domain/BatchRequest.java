@@ -150,6 +150,7 @@ public class BatchRequest {
         try {
             this.countDownLatch.await();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(this.exception.getMessage(), this.exception);
         }
         if (this.hasException()) {
