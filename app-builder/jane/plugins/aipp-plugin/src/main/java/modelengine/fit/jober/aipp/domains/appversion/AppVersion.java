@@ -29,7 +29,7 @@ import static modelengine.fit.jober.aipp.util.UsefulUtils.doIfNull;
 import static modelengine.fitframework.util.ObjectUtils.cast;
 
 import lombok.Getter;
-import modelengine.fel.tool.service.ToolService;
+import modelengine.jade.store.service.ToolService;
 import modelengine.fit.jade.aipp.model.dto.ModelAccessInfo;
 import modelengine.fit.jade.aipp.model.dto.ModelListDto;
 import modelengine.fit.jade.aipp.model.service.AippModelCenter;
