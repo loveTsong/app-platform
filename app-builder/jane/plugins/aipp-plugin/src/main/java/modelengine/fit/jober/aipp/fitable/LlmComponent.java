@@ -401,6 +401,7 @@ public class LlmComponent implements FlowableService {
         return ChatOption.custom()
                 .model(accessInfo.get("serviceName"))
                 .baseUrl(modelAccessInfo.getBaseUrl())
+                .stream(true)
                 .secureConfig(modelAccessInfo.isSystemModel() ? null : SecureConfig.custom().ignoreTrust(true).build())
                 .apiKey(modelAccessInfo.getAccessKey())
                 .temperature(ObjectUtils.cast(businessData.get("temperature")))
