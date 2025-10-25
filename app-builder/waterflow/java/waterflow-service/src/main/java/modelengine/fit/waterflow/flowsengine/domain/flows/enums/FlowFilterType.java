@@ -6,9 +6,6 @@
 
 package modelengine.fit.waterflow.flowsengine.domain.flows.enums;
 
-import static java.util.Locale.ROOT;
-import static modelengine.fit.waterflow.ErrorCodes.ENUM_CONVERT_FAILED;
-
 import lombok.Getter;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes.filters.BatchSizeFilterParser;
@@ -19,6 +16,9 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.validators.rules.filte
 import modelengine.fit.waterflow.flowsengine.domain.flows.validators.rules.filters.TransBatchSizeFilterRule;
 
 import java.util.Arrays;
+
+import static java.util.Locale.ROOT;
+import static modelengine.fit.waterflow.ErrorCodes.ENUM_CONVERT_FAILED;
 
 /**
  * 流程定义过滤器类型

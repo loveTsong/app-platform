@@ -9,14 +9,14 @@ package modelengine.fit.waterflow.flowsengine.domain.flows.parsers;
 import com.alibaba.fastjson.JSONObject;
 
 import lombok.RequiredArgsConstructor;
-import modelengine.fit.waterflow.ErrorCodes;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.callbacks.FlowCallback;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowCallbackType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowDefinitionStatus;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
+import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeParserType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes.NodeParser;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes.callbacks.CallbackParser;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes.events.EventParser;
@@ -69,7 +69,7 @@ public class FlowParser implements Parser {
         Map<String, FlowNode> allNodeMap = new HashMap<>();
         IntStream.range(0, flowGraphData.getNodes()).forEach(nodeIndex -> {
             FlowNodeType nodeType = FlowNodeType.getNodeType(flowGraphData.getNodeType(nodeIndex));
-            NodeParser nodeParser = nodeType.getNodeParser();
+            NodeParser nodeParser = FlowNodeParserType.getParser(nodeType);
             Validation.notNull(nodeParser,
                     () -> new WaterflowParamException(INPUT_PARAM_IS_INVALID, "flow node type " + nodeType.getCode()));
             FlowNode flowNode = nodeParser.parseNode(flowGraphData, nodeIndex);

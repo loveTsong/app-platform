@@ -12,14 +12,14 @@ import com.alibaba.fastjson.JSON;
 
 import lombok.Getter;
 import modelengine.fit.waterflow.common.Constant;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
+import modelengine.fit.waterflow.domain.stream.reactive.Processor;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.nodes.Blocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.nodes.Node;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.stream.nodes.Blocks;
+import modelengine.fit.waterflow.domain.stream.nodes.Node;
 import modelengine.fitframework.log.Logger;
 
 import java.util.HashMap;
@@ -50,10 +50,10 @@ public class FlowStateNode extends FlowNode {
      * @param repo stream流程上下文repo
      * @param messenger stream流程事件发送器
      * @param locks 流程锁
-     * @return {@link FitStream.Processor}
+     * @return {@link Processor}
      */
     @Override
-    public FitStream.Processor<FlowData, FlowData> getProcessor(String streamId, FlowContextRepo<FlowData> repo,
+    public Processor<FlowData, FlowData> getProcessor(String streamId, FlowContextRepo repo,
             FlowContextMessenger messenger, FlowLocks locks) {
         if (!Optional.ofNullable(this.processor).isPresent()) {
             Node<FlowData, FlowData> node = new Node<>(streamId, this.metaId, this::stateProduce, repo, messenger,

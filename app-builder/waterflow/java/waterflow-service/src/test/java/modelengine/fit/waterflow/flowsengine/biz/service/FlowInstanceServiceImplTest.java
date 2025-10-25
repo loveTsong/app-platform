@@ -7,10 +7,10 @@
 package modelengine.fit.waterflow.flowsengine.biz.service;
 
 import modelengine.fit.waterflow.entity.JoberErrorInfo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
 import modelengine.fit.waterflow.service.FlowRuntimeService;
 import modelengine.fit.waterflow.service.SingleFlowRuntimeService;
 import org.junit.jupiter.api.BeforeEach;

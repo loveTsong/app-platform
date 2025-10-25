@@ -9,19 +9,21 @@ package modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes;
 import static modelengine.fitframework.util.ObjectUtils.cast;
 
 import lombok.Getter;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
+import modelengine.fit.waterflow.domain.stream.reactive.Processor;
+import modelengine.fit.waterflow.domain.stream.reactive.Publisher;
+import modelengine.fit.waterflow.domain.stream.reactive.Subscriber;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.converter.MappingFromType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.converter.MappingNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.converter.MappingNodeType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.converter.MappingProcessorFactory;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.events.FlowEvent;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.Processors;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.nodes.ConditionsNode;
+import modelengine.fit.waterflow.domain.stream.operators.Operators;
+import modelengine.fit.waterflow.domain.stream.nodes.ConditionsNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.utils.FlowExecuteInfoUtil;
 import modelengine.fit.waterflow.flowsengine.utils.OhScriptExecutor;
 import modelengine.fitframework.log.Logger;
@@ -61,10 +63,10 @@ public class FlowConditionNode extends FlowNode {
      * @param repo stream流程上下文repo
      * @param messenger stream流程事件发送器
      * @param locks 流程锁
-     * @return {@link FitStream.Processor}
+     * @return {@link Processor}
      */
     @Override
-    public FitStream.Processor<FlowData, FlowData> getProcessor(String streamId, FlowContextRepo<FlowData> repo,
+    public Processor<FlowData, FlowData> getProcessor(String streamId, FlowContextRepo repo,
             FlowContextMessenger messenger, FlowLocks locks) {
         if (!Optional.ofNullable(this.processor).isPresent()) {
             this.processor = new ConditionsNode<>(streamId, this.metaId, this::conditionalJuster, repo, messenger,
@@ -78,18 +80,18 @@ public class FlowConditionNode extends FlowNode {
 
     @Override
     protected void subscribe(
-            FitStream.Publisher<FlowData> from, FitStream.Subscriber<FlowData, FlowData> to, FlowEvent event) {
-        from.subscribe(event.getMetaId(), to, null, this.getWhether(from.getStreamId(), event));
+            Publisher<FlowData> from, Subscriber<FlowData, FlowData> to, FlowEvent event) {
+        from.subscribe(event.getMetaId(), to, this.getWhether(from.getStreamId(), event));
     }
 
-    private Processors.Whether<FlowData> getWhether(String streamId, FlowEvent event) {
+    private Operators.Whether<FlowData> getWhether(String streamId, FlowEvent event) {
         log.info("[flowEngines] stream {} condition node {} with origin rule {}", streamId, this.metaId,
                 event.getConditionRule());
 
         return (input) -> {
             String conditionRule = event.getConditionRule();
             log.info("[flowEngines] stream {} condition node {} with rule {}", streamId, this.metaId, conditionRule);
-            return OhScriptExecutor.evaluateConditionRule(input.getData(), conditionRule);
+            return OhScriptExecutor.evaluateConditionRule(input, conditionRule);
         };
     }
 

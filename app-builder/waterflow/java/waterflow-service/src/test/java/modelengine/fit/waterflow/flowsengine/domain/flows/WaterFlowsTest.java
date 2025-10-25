@@ -7,8 +7,8 @@
 package modelengine.fit.waterflow.flowsengine.domain.flows;
 
 import static modelengine.fit.waterflow.flowsengine.domain.flows.FlowsTestUtil.MAX_WAIT_TIME_MS;
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus.PENDING;
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus.READY;
+import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.PENDING;
+import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.READY;
 import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.ParallelMode.EITHER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -16,16 +16,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import modelengine.fit.waterflow.MethodNameLoggerExtension;
 import modelengine.fit.ohscript.util.UUIDUtil;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMemoMessenger;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMemoRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocksMemo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.nodes.Blocks.FilterBlock;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.nodes.Blocks.ValidatorBlock;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.stream.nodes.Blocks.FilterBlock;
+import modelengine.fit.waterflow.domain.stream.nodes.Blocks.ValidatorBlock;
 import modelengine.fitframework.util.ObjectUtils;
 
 import org.junit.jupiter.api.Assertions;

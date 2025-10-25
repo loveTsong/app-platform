@@ -8,7 +8,7 @@ package modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes;
 
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowStateNode;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.FlowGraphData;
 
 /**

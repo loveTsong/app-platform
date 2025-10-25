@@ -20,10 +20,14 @@ import static modelengine.fit.waterflow.common.Constant.STREAM_ID_SEPARATOR;
 import static modelengine.fit.waterflow.common.Constant.TO_BATCH_KEY;
 import static modelengine.fit.waterflow.common.Constant.TRACE_EXCLUSIVE_STATUS_MAP;
 import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowDefinitionStatus.INACTIVE;
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.ProcessType.PROCESS;
 import static modelengine.fit.waterflow.spi.FlowCompletedService.FLOW_CALLBACK_GENERICABLE;
 import static modelengine.fitframework.util.ObjectUtils.cast;
 
+import modelengine.fit.waterflow.domain.context.FlowTrace;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStage;
+import modelengine.fit.waterflow.domain.stream.nodes.From;
+import modelengine.fit.waterflow.domain.utils.IdGenerator;
 import modelengine.fit.waterflow.entity.OperationContext;
 import modelengine.fit.waterflow.exceptions.WaterflowException;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
@@ -40,32 +44,23 @@ import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowDefinitionQue
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowQueryService;
 import modelengine.fit.waterflow.flowsengine.biz.service.entity.FlowRetryInfo;
 import modelengine.fit.waterflow.flowsengine.biz.service.entity.FlowsErrorInfo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.InterStream;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowOfferId;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowRetry;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowTrace;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowTrans;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.QueryFlowContextPersistRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.FlowRetryRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.events.FlowEvent;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.FlowDefinitionRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStage;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowTraceStatus;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.From;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.IdGenerator;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.To;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.nodes.Blocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.nodes.Node;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.enums.FlowTraceStatus;
+import modelengine.fit.waterflow.domain.stream.nodes.Blocks;
+import modelengine.fit.waterflow.domain.stream.nodes.Node;
 import modelengine.fit.waterflow.flowsengine.domain.flows.utils.FlowExecuteInfoUtil;
 import modelengine.fit.waterflow.flowsengine.fitable.TraceServiceImpl;
 import modelengine.fit.waterflow.flowsengine.persist.po.FlowContextPO;
@@ -206,12 +201,12 @@ public class FlowRuntimeServiceImpl implements FlowRuntimeService {
         contextData.put("flowDefinitionId", flowId);
         contextData.put("nodeType", FlowNodeType.START.getCode());
         LocalDateTime startTime = LocalDateTime.now();
-        FlowOfferId offerId = from.offer(flowData);
+        String offerId = from.offer(flowData);
         LOG.info("[perf] [{}] startFlows offer end, flowId={}", System.currentTimeMillis(), flowId);
-        this.publishStartNodeData(flowDefinition, offerId.getTraceId(), from, flowData, startTime);
-        LOG.info("Flow1 has been started, the flow offer id is {}:{}.", offerId.getTrans().getId(),
-                offerId.getTraceId());
-        return new FlowStartDTO(offerId.getTrans().getId(), offerId.getTraceId());
+        this.publishStartNodeData(flowDefinition, offerId, from, flowData, startTime);
+        LOG.info("Flow1 has been started, the flow offer id is {}:{}.", offerId,
+                offerId);
+        return new FlowStartDTO(offerId, offerId);
     }
 
     @Override
@@ -222,44 +217,45 @@ public class FlowRuntimeServiceImpl implements FlowRuntimeService {
             throw new WaterflowParamException(FLOW_START_ERROR);
         }
         From<FlowData> from = ObjectUtils.cast(flowQueryService.getPublisher(flowDefinition.getStreamId()));
-        FlowOfferId offerId = from.offer(FlowData.parseFromJson(flowData));
-        LOG.info("Flow2 has been started, the flow offer id is {}:{}.", offerId.getTrans().getId(),
-                offerId.getTraceId());
-        return new FlowStartDTO(offerId.getTrans().getId(), offerId.getTraceId());
+        String offerId = from.offer(FlowData.parseFromJson(flowData));
+        LOG.info("Flow2 has been started, the flow offer id is {}:{}.", offerId,
+                offerId);
+        return new FlowStartDTO(offerId, offerId);
     }
 
     @Override
     public FlowStartDTO startFlowsWithTrans(String metaId, String version, String transId, String flowData) {
-        FlowDefinition flowDefinition = Optional.ofNullable(definitionQueryService.findByStreamId(metaId + version))
-                .orElseThrow(() -> new WaterflowParamException(ENTITY_NOT_FOUND, "startFlowsWithTrans", metaId, version));
-        if (flowDefinition.getStatus() == INACTIVE) {
-            throw new WaterflowParamException(FLOW_START_ERROR);
-        }
-        From<FlowData> from = ObjectUtils.cast(flowQueryService.getPublisher(flowDefinition.getStreamId()));
-        FlowOfferId offerId = from.offer(FlowData.parseFromJson(flowData), new FlowTrans(transId));
-        LOG.info("Flow3 has been started, the flow offer id is {}:{}.", offerId.getTrans().getId(),
-                offerId.getTraceId());
-        return new FlowStartDTO(offerId.getTrans().getId(), offerId.getTraceId());
+        // FlowDefinition flowDefinition = Optional.ofNullable(definitionQueryService.findByStreamId(metaId + version))
+        //         .orElseThrow(() -> new WaterflowParamException(ENTITY_NOT_FOUND, "startFlowsWithTrans", metaId, version));
+        // if (flowDefinition.getStatus() == INACTIVE) {
+        //     throw new WaterflowParamException(FLOW_START_ERROR);
+        // }
+        // From<FlowData> from = ObjectUtils.cast(flowQueryService.getPublisher(flowDefinition.getStreamId()));
+        // FlowOfferId offerId = from.offer(FlowData.parseFromJson(flowData), new FlowTrans(transId));
+        // LOG.info("Flow3 has been started, the flow offer id is {}:{}.", offerId.getTrans().getId(),
+        //         offerId.getTraceId());
+        // return new FlowStartDTO(offerId.getTrans().getId(), offerId.getTraceId());
+        return new FlowStartDTO("", "");
     }
 
-    @Transactional
-    public void deleteFlow(String transId) {
-        List<String> traceIds = repo.getTraceByTransId(transId);
-        repo.deleteByTransId(transId);
-        traceRepo.deleteByIdList(traceIds);
-    }
+    // @Transactional
+    // public void deleteFlow(String transId) {
+    //     List<String> traceIds = repo.getTraceByTransId(transId);
+    //     repo.deleteByTransId(transId);
+    //     traceRepo.deleteByIdList(traceIds);
+    // }
 
-    public void offerFlowNode(String metaId, String version, String nodeMetaId, InterStream<FlowData> publisher) {
-        FlowDefinition flowDefinition = Optional.ofNullable(definitionRepo.findByMetaIdAndVersion(metaId, version))
-                .orElseThrow(() -> new WaterflowParamException(ENTITY_NOT_FOUND, "offerFlowNode", metaId, version));
-        if (flowDefinition.getStatus() == INACTIVE) {
-            throw new WaterflowParamException(FLOW_START_ERROR);
-        }
-        From<FlowData> from = ObjectUtils.cast(flowQueryService.getPublisher(flowDefinition.getStreamId()));
-        Node<FlowData, ?> node = from.findNodeFromFlow(from, nodeMetaId);
-        Validation.notNull(node, () -> new WaterflowParamException(FLOW_NODE_NOT_FOUND, nodeMetaId, metaId, version));
-        node.offer(publisher);
-    }
+    // public void offerFlowNode(String metaId, String version, String nodeMetaId, InterStream<FlowData> publisher) {
+    //     FlowDefinition flowDefinition = Optional.ofNullable(definitionRepo.findByMetaIdAndVersion(metaId, version))
+    //             .orElseThrow(() -> new WaterflowParamException(ENTITY_NOT_FOUND, "offerFlowNode", metaId, version));
+    //     if (flowDefinition.getStatus() == INACTIVE) {
+    //         throw new WaterflowParamException(FLOW_START_ERROR);
+    //     }
+    //     From<FlowData> from = ObjectUtils.cast(flowQueryService.getPublisher(flowDefinition.getStreamId()));
+    //     Node<FlowData, ?> node = from.findNodeFromFlow(from, nodeMetaId);
+    //     Validation.notNull(node, () -> new WaterflowParamException(FLOW_NODE_NOT_FOUND, nodeMetaId, metaId, version));
+    //     node.offer(publisher);
+    // }
 
     @Override
     public void resumeFlows(String flowId, Map<String, Map<String, Object>> contexts) {
@@ -415,31 +411,31 @@ public class FlowRuntimeServiceImpl implements FlowRuntimeService {
         return repo.getContextsByTrace(traceId);
     }
 
-    public List<FlowsErrorInfo> getFlowErrorInfo(String traceId) {
-        List<FlowContext<FlowData>> errorContexts = repo.findErrorContextsByTraceId(traceId);
-        FlowTrace flowTrace = Optional.ofNullable(traceRepo.find(traceId))
-                .orElseThrow(() -> new WaterflowParamException(ENTITY_NOT_FOUND, traceId));
-        FlowDefinition flowDefinition = definitionQueryService.findByStreamId(flowTrace.getStreamId());
-        if (flowDefinition == null) {
-            LOG.error("Get flow error info failed, flow definition not found");
-            throw new WaterflowParamException(ENTITY_NOT_FOUND, traceId);
-        }
-        return errorContexts.stream().map(c -> {
-            FlowNode flowNode = flowDefinition.getNodeMap().get(c.getPosition());
-            String nodeName = null;
-            if (flowNode == null) {
-                nodeName = flowDefinition.getToNodeByEventId(c.getPosition()).getName();
-            } else {
-                nodeName = flowNode.getName();
-            }
-            return FlowsErrorInfo.builder()
-                    .businessData(c.getData().getBusinessData())
-                    .contextErrorInfo(c.getData().getErrorInfo())
-                    .nodeId(c.getPosition())
-                    .nodeName(nodeName)
-                    .build();
-        }).collect(Collectors.toList());
-    }
+    // public List<FlowsErrorInfo> getFlowErrorInfo(String traceId) {
+    //     List<FlowContext<FlowData>> errorContexts = repo.findErrorContextsByTraceId(traceId);
+    //     FlowTrace flowTrace = Optional.ofNullable(traceRepo.find(traceId))
+    //             .orElseThrow(() -> new WaterflowParamException(ENTITY_NOT_FOUND, traceId));
+    //     FlowDefinition flowDefinition = definitionQueryService.findByStreamId(flowTrace.getStreamId());
+    //     if (flowDefinition == null) {
+    //         LOG.error("Get flow error info failed, flow definition not found");
+    //         throw new WaterflowParamException(ENTITY_NOT_FOUND, traceId);
+    //     }
+    //     return errorContexts.stream().map(c -> {
+    //         FlowNode flowNode = flowDefinition.getNodeMap().get(c.getPosition());
+    //         String nodeName = null;
+    //         if (flowNode == null) {
+    //             nodeName = flowDefinition.getToNodeByEventId(c.getPosition()).getName();
+    //         } else {
+    //             nodeName = flowNode.getName();
+    //         }
+    //         return FlowsErrorInfo.builder()
+    //                 .businessData(c.getData().getBusinessData())
+    //                 .contextErrorInfo(c.getData().getErrorInfo())
+    //                 .nodeId(c.getPosition())
+    //                 .nodeName(nodeName)
+    //                 .build();
+    //     }).collect(Collectors.toList());
+    // }
 
     private void publishStartNodeData(FlowDefinition flowDefinition, String traceId, From<FlowData> from,
             FlowData flowData, LocalDateTime createAt) {
@@ -489,34 +485,34 @@ public class FlowRuntimeServiceImpl implements FlowRuntimeService {
         return result;
     }
 
-    private String getTraceStatus(String traceId, FlowDefinition flowDefinition) {
-        boolean isTerminated = repo.hasContextWithStatus(Collections.singletonList(FlowNodeStatus.TERMINATE.name()),
-                traceId);
-        if (isTerminated) {
-            return FlowTraceStatus.TERMINATE.name();
-        }
-
-        boolean isRunning = repo.hasContextWithStatus(traceRunningStatus, traceId);
-        if (isRunning) {
-            return FlowTraceStatus.RUNNING.name();
-        }
-        boolean isArchived = repo.isAllContextStatus(Collections.singletonList(FlowNodeStatus.ARCHIVED.name()),
-                traceId);
-        if (isArchived) {
-            return FlowTraceStatus.ARCHIVED.name();
-        }
-        boolean hasError = repo.hasContextWithStatus(Collections.singletonList(FlowNodeStatus.ERROR.name()), traceId);
-        if (hasError) {
-            String endNode = flowDefinition.getEndNode();
-            boolean hasArchivedInEndNode = repo.hasContextWithStatusAtPosition(
-                    Collections.singletonList(FlowNodeStatus.ARCHIVED.name()), traceId, endNode);
-            if (hasArchivedInEndNode) {
-                return FlowTraceStatus.PARTIAL_ERROR.name();
-            }
-            return FlowTraceStatus.ERROR.name();
-        }
-        return FlowTraceStatus.RUNNING.name();
-    }
+    // private String getTraceStatus(String traceId, FlowDefinition flowDefinition) {
+    //     boolean isTerminated = repo.hasContextWithStatus(Collections.singletonList(FlowNodeStatus.TERMINATE.name()),
+    //             traceId);
+    //     if (isTerminated) {
+    //         return FlowTraceStatus.TERMINATE.name();
+    //     }
+    //
+    //     boolean isRunning = repo.hasContextWithStatus(traceRunningStatus, traceId);
+    //     if (isRunning) {
+    //         return FlowTraceStatus.RUNNING.name();
+    //     }
+    //     boolean isArchived = repo.isAllContextStatus(Collections.singletonList(FlowNodeStatus.ARCHIVED.name()),
+    //             traceId);
+    //     if (isArchived) {
+    //         return FlowTraceStatus.ARCHIVED.name();
+    //     }
+    //     boolean hasError = repo.hasContextWithStatus(Collections.singletonList(FlowNodeStatus.ERROR.name()), traceId);
+    //     if (hasError) {
+    //         String endNode = flowDefinition.getEndNode();
+    //         boolean hasArchivedInEndNode = repo.hasContextWithStatusAtPosition(
+    //                 Collections.singletonList(FlowNodeStatus.ARCHIVED.name()), traceId, endNode);
+    //         if (hasArchivedInEndNode) {
+    //             return FlowTraceStatus.PARTIAL_ERROR.name();
+    //         }
+    //         return FlowTraceStatus.ERROR.name();
+    //     }
+    //     return FlowTraceStatus.RUNNING.name();
+    // }
 
     @Override
     public void terminateFlows(String traceId, Map<String, Object> filter, OperationContext operationContext) {
@@ -556,7 +552,7 @@ public class FlowRuntimeServiceImpl implements FlowRuntimeService {
         FlowDefinition flowDefinition = definitionQueryService.findByStreamId(preContext.getStreamId());
         boolean enableOutputScope = flowDefinition.isEnableOutputScope();
         From<FlowData> from = (From<FlowData>) flowQueryService.getPublisher(flowDefinition.getStreamId());
-        Node<FlowData, FlowData> node = from.findNodeFromFlow(from, preContext.getPosition());
+        Node<FlowData, FlowData> node = cast(from.findNodeFromFlow(from, preContext.getPosition()));
         String flowDataTemplate = preContext.getData().translateToJson();
 
         FlowNode currentFlowNode = flowDefinition.getFlowNode(preContext.getPosition());
@@ -620,7 +616,7 @@ public class FlowRuntimeServiceImpl implements FlowRuntimeService {
         FlowContext<FlowData> preContext = pre.get(0);
         From<FlowData> from = (From<FlowData>) flowQueryService.getPublisher(preContext.getStreamId());
         Node<FlowData, FlowData> node = cast(from.findNodeFromFlow(from, preContext.getPosition()));
-        node.setFailed(pre, exception);
+        node.fail(exception, pre);
     }
 
     public void terminateFlowsByTransId(String transId, OperationContext operationContext) {
@@ -636,29 +632,29 @@ public class FlowRuntimeServiceImpl implements FlowRuntimeService {
                 .forEach(traceId -> terminateFlows(traceId, filter, operationContext));
     }
 
-    @Scheduled(strategy = Scheduled.Strategy.FIXED_RATE, value = "5000")
-    public void calculateFlowTraceStatus() {
-        try {
-            List<String> traceIds = this.traceOwnerService.getTraces();
-            if (traceIds.isEmpty()) {
-                return;
-            }
-            List<FlowTrace> flowTraces = traceRepo.findTraceByIdList(traceIds);
-            List<String> flowTraceIds = flowTraces.stream().map(IdGenerator::getId).collect(Collectors.toList());
-            traceIds.forEach(traceId -> {
-                if (!flowTraceIds.contains(traceId)) {
-                    this.tryReleaseMissedTrace(traceId);
-                }
-            });
-            flowTraces.forEach(trace -> {
-                calculateTraceStatus(trace);
-            });
-        } catch (Throwable e) {
-            LOG.error("The calculate flow trace status timer has error, traceSize={}, errorMessage={}.",
-                    this.traceOwnerService.getTraces().size(), e.getMessage());
-            LOG.error("Exception=", e);
-        }
-    }
+    // @Scheduled(strategy = Scheduled.Strategy.FIXED_RATE, value = "5000")
+    // public void calculateFlowTraceStatus() {
+    //     try {
+    //         List<String> traceIds = this.traceOwnerService.getTraces();
+    //         if (traceIds.isEmpty()) {
+    //             return;
+    //         }
+    //         List<FlowTrace> flowTraces = traceRepo.findTraceByIdList(traceIds);
+    //         List<String> flowTraceIds = flowTraces.stream().map(IdGenerator::getId).collect(Collectors.toList());
+    //         traceIds.forEach(traceId -> {
+    //             if (!flowTraceIds.contains(traceId)) {
+    //                 this.tryReleaseMissedTrace(traceId);
+    //             }
+    //         });
+    //         flowTraces.forEach(trace -> {
+    //             calculateTraceStatus(trace);
+    //         });
+    //     } catch (Throwable e) {
+    //         LOG.error("The calculate flow trace status timer has error, traceSize={}, errorMessage={}.",
+    //                 this.traceOwnerService.getTraces().size(), e.getMessage());
+    //         LOG.error("Exception=", e);
+    //     }
+    // }
 
     private void tryReleaseMissedTrace(String traceId) {
         LOG.info("Check the missed trace. id={}.", traceId);
@@ -669,49 +665,49 @@ public class FlowRuntimeServiceImpl implements FlowRuntimeService {
         this.traceOwnerService.release(traceId);
     }
 
-    private void calculateTraceStatus(FlowTrace trace) {
-        try {
-            String transId = repo.getTransIdByTrace(trace.getId());
-            if (StringUtils.isBlank(transId)) {
-                LOG.info("The trace is not ready, traceId={}.", trace.getId());
-                return;
-            }
-            FlowDefinition flowDefinition = definitionQueryService.findByStreamId(trace.getStreamId());
-            if (flowDefinition == null) {
-                LOG.warn("Flow definition is null, stream id:{}, trace:{}", trace.getStreamId(), trace.getId());
-                this.traceOwnerService.release(trace.getId());
-                return;
-            }
-            String status = getTraceStatus(trace.getId(), flowDefinition);
-            if (!Objects.equals(status, FlowTraceStatus.RUNNING.name())) {
-                updateTraceStatus(trace, transId, status, flowDefinition);
-            }
-        } catch (Throwable e) {
-            LOG.error("Failed to calculate flow trace status, streamId={}, traceId={}.", trace.getStreamId(),
-                    trace.getId(), e.getMessage());
-            LOG.error("Exception=", e);
-        }
-    }
+    // private void calculateTraceStatus(FlowTrace trace) {
+    //     try {
+    //         String transId = repo.getTransIdByTrace(trace.getId());
+    //         if (StringUtils.isBlank(transId)) {
+    //             LOG.info("The trace is not ready, traceId={}.", trace.getId());
+    //             return;
+    //         }
+    //         FlowDefinition flowDefinition = definitionQueryService.findByStreamId(trace.getStreamId());
+    //         if (flowDefinition == null) {
+    //             LOG.warn("Flow definition is null, stream id:{}, trace:{}", trace.getStreamId(), trace.getId());
+    //             this.traceOwnerService.release(trace.getId());
+    //             return;
+    //         }
+    //         String status = getTraceStatus(trace.getId(), flowDefinition);
+    //         if (!Objects.equals(status, FlowTraceStatus.RUNNING.name())) {
+    //             updateTraceStatus(trace, transId, status, flowDefinition);
+    //         }
+    //     } catch (Throwable e) {
+    //         LOG.error("Failed to calculate flow trace status, streamId={}, traceId={}.", trace.getStreamId(),
+    //                 trace.getId(), e.getMessage());
+    //         LOG.error("Exception=", e);
+    //     }
+    // }
 
-    private void updateTraceStatus(FlowTrace trace, String transId, String status,
-                                   FlowDefinition flowDefinition) {
-        LOG.info("The trace is completed, traceId={}, status={}.", trace.getId(), status);
-        traceRepo.updateStatus(Collections.singletonList(trace.getId()), status);
-        Lock transIdLock = locks.getDistributedLock(transId);
-        transIdLock.lock();
-        try {
-            FlowTraceStatus transStatus = calculateTransStatus(transId);
-            if (!Objects.equals(FlowTraceStatus.RUNNING, transStatus)) {
-                LOG.info("The trans is completed, transId={}, status={}.", transId, transStatus);
-                transFinishedCallback(transId, transStatus, flowDefinition.getFinishedCallbackFitables());
-            }
-        } finally {
-            transIdLock.unlock();
-        }
-        LOG.debug("Start release trace lock, traceId={}.", trace.getId());
-        this.traceOwnerService.release(trace.getId());
-        LOG.info("Finish processing the trace, transId={}, traceId={}, status={}.", transId, trace.getId(), status);
-    }
+    // private void updateTraceStatus(FlowTrace trace, String transId, String status,
+    //                                FlowDefinition flowDefinition) {
+    //     LOG.info("The trace is completed, traceId={}, status={}.", trace.getId(), status);
+    //     traceRepo.updateStatus(Collections.singletonList(trace.getId()), status);
+    //     Lock transIdLock = locks.getDistributedLock(transId);
+    //     transIdLock.lock();
+    //     try {
+    //         FlowTraceStatus transStatus = calculateTransStatus(transId);
+    //         if (!Objects.equals(FlowTraceStatus.RUNNING, transStatus)) {
+    //             LOG.info("The trans is completed, transId={}, status={}.", transId, transStatus);
+    //             transFinishedCallback(transId, transStatus, flowDefinition.getFinishedCallbackFitables());
+    //         }
+    //     } finally {
+    //         transIdLock.unlock();
+    //     }
+    //     LOG.debug("Start release trace lock, traceId={}.", trace.getId());
+    //     this.traceOwnerService.release(trace.getId());
+    //     LOG.info("Finish processing the trace, transId={}, traceId={}, status={}.", transId, trace.getId(), status);
+    // }
 
     private void transFinishedCallback(String transId, FlowTraceStatus transStatus, Set<String> callbackFitables) {
         String streamId = repo.getStreamIdByTransId(transId);
@@ -787,7 +783,7 @@ public class FlowRuntimeServiceImpl implements FlowRuntimeService {
         traceRepo.updateStatus(traceIds, status.toString());
     }
 
-    public List<String> findTraceIdsByContextIds(List<String> contextIds) {
-        return repo.findTraceIdsByContextIds(contextIds);
-    }
+    // public List<String> findTraceIdsByContextIds(List<String> contextIds) {
+    //     return repo.findTraceIdsByContextIds(contextIds);
+    // }
 }

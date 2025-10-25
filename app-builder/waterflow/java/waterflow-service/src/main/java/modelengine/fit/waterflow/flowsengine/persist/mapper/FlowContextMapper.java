@@ -6,7 +6,7 @@
 
 package modelengine.fit.waterflow.flowsengine.persist.mapper;
 
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
 import modelengine.fit.waterflow.flowsengine.persist.entity.FlowContextUpdateInfo;
 import modelengine.fit.waterflow.flowsengine.persist.po.FlowContextPO;
 

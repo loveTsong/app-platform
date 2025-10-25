@@ -8,6 +8,7 @@ package modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes;
 
 import com.alibaba.fastjson.JSONObject;
 
+import modelengine.fit.waterflow.domain.enums.FlowNodeTriggerMode;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.callbacks.FlowCallback;
@@ -17,7 +18,6 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.task
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowCallbackType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowFilterType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowJoberType;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeTriggerMode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowTaskType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.FlowGraphData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes.callbacks.CallbackParser;

@@ -15,7 +15,7 @@ import static modelengine.fit.waterflow.common.Constant.TRACE_ID_KEY;
 import modelengine.fit.jober.FlowSmartFormService;
 import modelengine.fit.jober.common.ErrorCodes;
 import modelengine.fit.jober.common.exceptions.JobberException;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.tasks.FlowTask;
 import modelengine.fitframework.broker.client.BrokerClient;

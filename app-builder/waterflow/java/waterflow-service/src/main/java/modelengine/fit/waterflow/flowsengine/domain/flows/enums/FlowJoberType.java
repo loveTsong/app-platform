@@ -6,8 +6,6 @@
 
 package modelengine.fit.waterflow.flowsengine.domain.flows.enums;
 
-import static modelengine.fit.waterflow.ErrorCodes.ENUM_CONVERT_FAILED;
-
 import lombok.Getter;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes.jobers.EchoJoberParser;
@@ -27,6 +25,8 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.validators.rules.jober
 
 import java.util.Arrays;
 import java.util.Locale;
+
+import static modelengine.fit.waterflow.ErrorCodes.ENUM_CONVERT_FAILED;
 
 /**
  * 流程定义自动任务类型

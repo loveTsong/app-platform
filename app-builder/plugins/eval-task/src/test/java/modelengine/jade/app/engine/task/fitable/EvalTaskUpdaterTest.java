@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 import modelengine.fit.waterflow.entity.FlowTransCompletionInfo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowTraceStatus;
+import modelengine.fit.waterflow.domain.enums.FlowTraceStatus;
 import modelengine.fitframework.annotation.Fit;
 import modelengine.fitframework.test.annotation.IntegrationTest;
 import modelengine.fitframework.test.annotation.Spy;

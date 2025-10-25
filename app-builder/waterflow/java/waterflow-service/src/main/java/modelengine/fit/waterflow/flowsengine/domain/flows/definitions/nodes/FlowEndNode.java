@@ -7,13 +7,13 @@
 package modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes;
 
 import lombok.Getter;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
+import modelengine.fit.waterflow.domain.stream.nodes.To;
+import modelengine.fit.waterflow.domain.stream.reactive.Subscriber;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.To;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fitframework.log.Logger;
 
 import java.util.List;
@@ -31,10 +31,10 @@ import java.util.stream.Collectors;
 public class FlowEndNode extends FlowNode {
     private static final Logger log = Logger.get(FlowEndNode.class);
 
-    private FitStream.Subscriber<FlowData, FlowData> subscriber;
+    private Subscriber<FlowData, FlowData> subscriber;
 
     @Override
-    public FitStream.Subscriber<FlowData, FlowData> getSubscriber(String streamId, FlowContextRepo<FlowData> repo,
+    public Subscriber<FlowData, FlowData> getSubscriber(String streamId, FlowContextRepo repo,
             FlowContextMessenger messenger, FlowLocks locks) {
         if (!Optional.ofNullable(this.subscriber).isPresent()) {
             this.subscriber = new To<>(streamId, this.metaId, this::endProduce, repo, messenger, locks, this.type);

@@ -7,7 +7,7 @@
 package modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.callbacks;
 
 import modelengine.fit.waterflow.common.Constant;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.spi.FlowCallbackService;
 import modelengine.fitframework.broker.client.filter.route.FitableIdFilter;

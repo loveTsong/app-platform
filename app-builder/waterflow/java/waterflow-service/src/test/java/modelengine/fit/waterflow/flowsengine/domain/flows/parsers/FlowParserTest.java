@@ -26,7 +26,7 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowDefinitionSt
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowJoberProperties;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowJoberType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeTriggerMode;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowTaskType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes.events.EventParser;
 import modelengine.fitframework.util.ObjectUtils;

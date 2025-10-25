@@ -10,9 +10,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.FlowDefinitionRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
@@ -57,7 +57,7 @@ class FlowCacheServiceTest {
         String streamId = "streamId";
         String definitionId = "definitionId";
         FlowDefinition definition = Mockito.mock(FlowDefinition.class);
-        FitStream.Publisher<FlowData> publisher = Mockito.mock(FitStream.Publisher.class);
+        Publisher<FlowData> publisher = Mockito.mock(Publisher.class);
         when(definitionRepo.findByStreamId(anyString())).thenReturn(definition);
         when(definition.convertToFlow(contextRepo, contextMessenger, locks)).thenReturn(publisher);
         when(definition.getStreamId()).thenReturn(streamId);
@@ -76,7 +76,7 @@ class FlowCacheServiceTest {
         String streamId = "streamId";
         String definitionId = "definitionId";
         FlowDefinition definition = Mockito.mock(FlowDefinition.class);
-        FitStream.Publisher<FlowData> publisher = Mockito.mock(FitStream.Publisher.class);
+        Publisher<FlowData> publisher = Mockito.mock(Publisher.class);
         when(definitionRepo.find(anyString())).thenReturn(definition);
         when(definition.convertToFlow(contextRepo, contextMessenger, locks)).thenReturn(publisher);
         when(definition.getStreamId()).thenReturn(streamId);
@@ -95,14 +95,14 @@ class FlowCacheServiceTest {
         String streamId = "streamId";
         String definitionId = "definitionId";
         FlowDefinition definition = Mockito.mock(FlowDefinition.class);
-        FitStream.Publisher<FlowData> publisher = Mockito.mock(FitStream.Publisher.class);
+        Publisher<FlowData> publisher = Mockito.mock(Publisher.class);
         when(definitionRepo.findByStreamId(anyString())).thenReturn(definition);
         when(definition.convertToFlow(contextRepo, contextMessenger, locks)).thenReturn(publisher);
         when(definition.getStreamId()).thenReturn(streamId);
         when(definition.getDefinitionId()).thenReturn(definitionId);
 
-        FitStream.Publisher<FlowData> persistPublisher = cacheService.getPublisher(streamId);
-        FitStream.Publisher<FlowData> cachePublisher = cacheService.getPublisher(streamId);
+        Publisher<FlowData> persistPublisher = cacheService.getPublisher(streamId);
+        Publisher<FlowData> cachePublisher = cacheService.getPublisher(streamId);
 
         Assertions.assertEquals(publisher, persistPublisher);
         Assertions.assertEquals(publisher, cachePublisher);

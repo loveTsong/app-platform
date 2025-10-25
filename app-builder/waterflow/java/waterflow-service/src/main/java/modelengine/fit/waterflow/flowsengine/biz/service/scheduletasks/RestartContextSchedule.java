@@ -8,26 +8,26 @@ package modelengine.fit.waterflow.flowsengine.biz.service.scheduletasks;
 
 import static modelengine.fit.waterflow.ErrorCodes.FLOW_START_ERROR;
 
+import modelengine.fit.waterflow.domain.context.FlowTrace;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
+import modelengine.fit.waterflow.domain.stream.nodes.From;
+import modelengine.fit.waterflow.domain.utils.IdGenerator;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.flowsengine.biz.service.TraceOwnerService;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowDefinitionQueryService;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowQueryService;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowTrace;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistMessenger;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.DefaultFlowDefinitionRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowDefinitionStatus;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.From;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.IdGenerator;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.nodes.Node;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.stream.nodes.Node;
 import modelengine.fitframework.log.Logger;
 import modelengine.fitframework.schedule.annotation.Scheduled;
 
@@ -85,9 +85,9 @@ public class RestartContextSchedule {
     @Scheduled(strategy = Scheduled.Strategy.FIXED_RATE, value = "60000")
     public void restartInterruptContext() {
         try {
-            List<String> traceIds = traceRepo.findRunningTrace(APPLICATIONS);
-            log.info("restartInterruptContext. traceIds:{}.", String.join(",", traceIds));
-            restartContext(traceIds);
+            // List<String> traceIds = traceRepo.findRunningTrace(APPLICATIONS);
+            // log.info("restartInterruptContext. traceIds:{}.", String.join(",", traceIds));
+            // restartContext(traceIds);
         } catch (Throwable e) {
             log.error("[restartInterruptContext] exception, errorMessage={}.", e.getMessage());
             log.error("[restartInterruptContext] exception=", e);
@@ -142,39 +142,39 @@ public class RestartContextSchedule {
     }
 
     private void restart(From<FlowData> flow, FlowDefinition flowDefinition, List<FlowContext<FlowData>> contexts) {
-        FlowContext<FlowData> context = contexts.get(0);
-        if (Objects.equals(context.getStatus(), FlowNodeStatus.NEW)) {
-            // 节点上new状态context
-            FlowNode flowNode = flowDefinition.getFlowNode(context.getPosition());
-            if (flowNode.belongTo(FlowNodeType.START)) {
-                flow.offer(contexts, (c) -> {});
-                return;
-            }
-            Node<FlowData, FlowData> node = flow.findNodeFromFlow(flow, context.getPosition());
-            node.offer(contexts, (c) -> {});
-        } else if (Objects.equals(context.getStatus(), FlowNodeStatus.PENDING) && !flowDefinition.getNodeMap()
-                .containsKey(context.getPosition())) {
-            // 线上pending状态context
-            FlowNode flowNode = flowDefinition.getFromNodeByEvent(context.getPosition());
-            if (flowNode.belongTo(FlowNodeType.START)) {
-                flow.offer(contexts, (c) -> {});
-                return;
-            }
-            Node<FlowData, FlowData> node = flow.findNodeFromFlow(flow, flowNode.getMetaId());
-            node.offer(contexts, (c) -> {});
-        } else if (Objects.equals(context.getStatus(), FlowNodeStatus.READY)) {
-            // 节点上ready状态context加到重试列表
-            List<List<FlowContext<FlowData>>> batchContextLists = new ArrayList<>(contexts.stream().collect(
-                    Collectors.groupingBy(FlowContext::getToBatch)).values());
-            batchContextLists.forEach(batchContexts -> {
-                List<String> contextIds = batchContexts.stream().map(IdGenerator::getId)
-                        .collect(Collectors.toList());
-                contextPersistRepo.updateStatus(contextIds, FlowNodeStatus.RETRYABLE);
-                contextPersistRepo.saveRetrySchedule(batchContexts);
-            });
-        } else {
-            log.warn("Unknown context status, status={}, traceId={}, position={}.", context.getStatus(),
-                    context.getTraceId(), context.getPosition());
-        }
+        // FlowContext<FlowData> context = contexts.get(0);
+        // if (Objects.equals(context.getStatus(), FlowNodeStatus.NEW)) {
+        //     // 节点上new状态context
+        //     FlowNode flowNode = flowDefinition.getFlowNode(context.getPosition());
+        //     if (flowNode.belongTo(FlowNodeType.START)) {
+        //         flow.offer(contexts, (c) -> {});
+        //         return;
+        //     }
+        //     Node<FlowData, FlowData> node = flow.findNodeFromFlow(flow, context.getPosition());
+        //     node.offer(contexts, (c) -> {});
+        // } else if (Objects.equals(context.getStatus(), FlowNodeStatus.PENDING) && !flowDefinition.getNodeMap()
+        //         .containsKey(context.getPosition())) {
+        //     // 线上pending状态context
+        //     FlowNode flowNode = flowDefinition.getFromNodeByEvent(context.getPosition());
+        //     if (flowNode.belongTo(FlowNodeType.START)) {
+        //         flow.offer(contexts, (c) -> {});
+        //         return;
+        //     }
+        //     Node<FlowData, FlowData> node = flow.findNodeFromFlow(flow, flowNode.getMetaId());
+        //     node.offer(contexts, (c) -> {});
+        // } else if (Objects.equals(context.getStatus(), FlowNodeStatus.READY)) {
+        //     // 节点上ready状态context加到重试列表
+        //     List<List<FlowContext<FlowData>>> batchContextLists = new ArrayList<>(contexts.stream().collect(
+        //             Collectors.groupingBy(FlowContext::getToBatch)).values());
+        //     batchContextLists.forEach(batchContexts -> {
+        //         List<String> contextIds = batchContexts.stream().map(IdGenerator::getId)
+        //                 .collect(Collectors.toList());
+        //         contextPersistRepo.updateStatus(contextIds, FlowNodeStatus.RETRYABLE);
+        //         contextPersistRepo.saveRetrySchedule(batchContexts);
+        //     });
+        // } else {
+        //     log.warn("Unknown context status, status={}, traceId={}, position={}.", context.getStatus(),
+        //             context.getTraceId(), context.getPosition());
+        // }
     }
 }

@@ -6,8 +6,8 @@
 
 package modelengine.fit.waterflow.flowsengine.biz.service;
 
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus.READY;
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus.RETRYABLE;
+import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.READY;
+import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.RETRYABLE;
 import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.ProcessType.PROCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -32,14 +32,14 @@ import modelengine.fit.waterflow.MethodNameLoggerExtension;
 import modelengine.fit.waterflow.common.utils.SleepUtil;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowDefinitionQueryService;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowQueryService;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowRetry;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowTrace;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.QueryFlowContextPersistRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.FlowRetryRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.FlowDefinitionRepo;

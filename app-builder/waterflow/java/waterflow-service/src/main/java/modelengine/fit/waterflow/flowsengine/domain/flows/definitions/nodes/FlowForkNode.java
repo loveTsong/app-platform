@@ -7,14 +7,14 @@
 package modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes;
 
 import lombok.Getter;
+import modelengine.fit.waterflow.domain.stream.reactive.Processor;
 import modelengine.fit.waterflow.exceptions.WaterflowException;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.nodes.Node;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.stream.nodes.Node;
 import modelengine.fitframework.log.Logger;
 
 import java.util.Optional;
@@ -40,10 +40,10 @@ public class FlowForkNode extends FlowNode {
      * @param repo stream流程上下文repo
      * @param messenger stream流程事件发送器
      * @param locks 流程锁
-     * @return {@link FitStream.Processor}
+     * @return {@link Processor}
      */
     @Override
-    public FitStream.Processor<FlowData, FlowData> getProcessor(String streamId, FlowContextRepo<FlowData> repo,
+    public Processor<FlowData, FlowData> getProcessor(String streamId, FlowContextRepo repo,
             FlowContextMessenger messenger, FlowLocks locks) {
         if (!Optional.ofNullable(processor).isPresent()) {
             this.processor = new Node<>(streamId, this.metaId, this::forkJuster, repo, messenger, locks, this.type);

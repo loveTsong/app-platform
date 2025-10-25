@@ -6,14 +6,14 @@
 
 package modelengine.fit.waterflow.flowsengine.domain.flows.enums;
 
-import static java.util.Locale.ROOT;
-
 import lombok.Getter;
 import modelengine.fit.waterflow.ErrorCodes;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes.tasks.TaskParser;
 
 import java.util.Arrays;
+
+import static java.util.Locale.ROOT;
 
 /**
  * 流程定义手动任务类型

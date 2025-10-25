@@ -19,7 +19,7 @@ import modelengine.fit.waterflow.entity.FlowErrorInfo;
 import modelengine.fit.waterflow.entity.FlowNodePublishInfo;
 import modelengine.fit.waterflow.entity.FlowPublishContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
 import modelengine.fit.waterflow.spi.FlowCallbackService;
 import modelengine.fit.waterflow.spi.FlowExceptionService;
 import modelengine.fit.waterflow.spi.FlowPublishService;

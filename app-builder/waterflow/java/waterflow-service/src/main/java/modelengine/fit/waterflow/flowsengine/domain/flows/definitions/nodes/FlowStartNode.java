@@ -7,12 +7,12 @@
 package modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes;
 
 import lombok.Getter;
+import modelengine.fit.waterflow.domain.stream.nodes.From;
+import modelengine.fit.waterflow.domain.stream.reactive.Publisher;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.From;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fitframework.log.Logger;
 
 import java.util.Optional;
@@ -28,10 +28,10 @@ import java.util.Optional;
 public class FlowStartNode extends FlowNode {
     private static final Logger log = Logger.get(FlowStartNode.class);
 
-    private FitStream.Publisher<FlowData> publisher;
+    private Publisher<FlowData> publisher;
 
     @Override
-    public FitStream.Publisher<FlowData> getPublisher(String streamId, FlowContextRepo<FlowData> repo,
+    public Publisher<FlowData> getPublisher(String streamId, FlowContextRepo repo,
             FlowContextMessenger messenger, FlowLocks locks) {
         if (!Optional.ofNullable(this.publisher).isPresent()) {
             this.publisher = new From<>(streamId, this.metaId, repo, messenger, locks);

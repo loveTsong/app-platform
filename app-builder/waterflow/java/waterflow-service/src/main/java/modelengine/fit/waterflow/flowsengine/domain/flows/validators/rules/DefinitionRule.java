@@ -9,7 +9,7 @@ package modelengine.fit.waterflow.flowsengine.domain.flows.validators.rules;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowDefinitionStatus;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.inspection.Validation;
 

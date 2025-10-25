@@ -11,7 +11,7 @@ import lombok.Data;
 import modelengine.fit.waterflow.ErrorCodes;
 import modelengine.fit.waterflow.exceptions.ServerInternalException;
 import modelengine.fit.waterflow.exceptions.WaterflowException;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.spi.lock.InvalidDistributedLockNotify;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.log.Logger;
@@ -73,39 +73,40 @@ public class DefaultTraceOwnerService implements TraceOwnerService {
 
     @Override
     public void own(String traceId, String transId) {
-        log.info("Start to own trace. traceId={}.", traceId);
-        Lock lock = this.locks.getDistributedLock(this.locks.traceLockKey(traceId));
-        for (int i = 0; i < MAX_TRY_COUNT; ++i) {
-            if (OwnLockHelper.tryLock(lock, traceId, DEFAULT_WAIT_TIME_MS)) {
-                log.info("Trace is owned. traceId={}, times={}.", traceId, i);
-                this.traceMap.put(traceId, new OwnInfo(traceId, transId, lock, Instant.now()));
-                return;
-            }
-            ThreadUtils.sleep(TRY_SLEEP_MS);
-        }
-        log.error("Can not own the trace, traceId={}.", traceId);
-        throw new WaterflowException(ErrorCodes.UN_EXCEPTED_ERROR, "can not own trace");
+        // log.info("Start to own trace. traceId={}.", traceId);
+        // Lock lock = this.locks.getDistributedLock(this.locks.traceLockKey(traceId));
+        // for (int i = 0; i < MAX_TRY_COUNT; ++i) {
+        //     if (OwnLockHelper.tryLock(lock, traceId, DEFAULT_WAIT_TIME_MS)) {
+        //         log.info("Trace is owned. traceId={}, times={}.", traceId, i);
+        //         this.traceMap.put(traceId, new OwnInfo(traceId, transId, lock, Instant.now()));
+        //         return;
+        //     }
+        //     ThreadUtils.sleep(TRY_SLEEP_MS);
+        // }
+        // log.error("Can not own the trace, traceId={}.", traceId);
+        // throw new WaterflowException(ErrorCodes.UN_EXCEPTED_ERROR, "can not own trace");
     }
 
     @Override
     public boolean tryOwn(String traceId, String transId) {
-        log.info("Start to try own trace. traceId={}.", traceId);
-        Lock lock = this.locks.getDistributedLock(this.locks.traceLockKey(traceId));
-        boolean tryLock = OwnLockHelper.tryLock(lock, traceId, DEFAULT_WAIT_TIME_MS);
-        if (tryLock) {
-            log.info("Trace is owned. traceId={}.", traceId);
-            this.traceMap.put(traceId, new OwnInfo(traceId, transId, lock, Instant.now()));
-        }
-        return tryLock;
+        // log.info("Start to try own trace. traceId={}.", traceId);
+        // Lock lock = this.locks.getDistributedLock(this.locks.traceLockKey(traceId));
+        // boolean tryLock = OwnLockHelper.tryLock(lock, traceId, DEFAULT_WAIT_TIME_MS);
+        // if (tryLock) {
+        //     log.info("Trace is owned. traceId={}.", traceId);
+        //     this.traceMap.put(traceId, new OwnInfo(traceId, transId, lock, Instant.now()));
+        // }
+        // return tryLock;
+        return false;
     }
 
     @Override
     public void release(String traceId) {
-        log.info("Start to release trace. traceId={}.", traceId);
-        Lock lock = this.locks.getDistributedLock(this.locks.traceLockKey(traceId));
-        OwnLockHelper.unlock(lock, traceId);
-        log.info("Trace is released, traceId={}.", traceId);
-        this.traceMap.remove(traceId);
+        // log.info("Start to release trace. traceId={}.", traceId);
+        // Lock lock = this.locks.getDistributedLock(this.locks.traceLockKey(traceId));
+        // OwnLockHelper.unlock(lock, traceId);
+        // log.info("Trace is released, traceId={}.", traceId);
+        // this.traceMap.remove(traceId);
     }
 
     @Override

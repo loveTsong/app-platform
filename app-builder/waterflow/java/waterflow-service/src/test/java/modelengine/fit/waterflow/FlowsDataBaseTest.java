@@ -7,10 +7,10 @@
 package modelengine.fit.waterflow;
 
 import static modelengine.fit.waterflow.ErrorCodes.FLOW_ENGINE_EXECUTOR_ERROR;
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus.ARCHIVED;
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus.ERROR;
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus.PENDING;
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus.RETRYABLE;
+import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.ARCHIVED;
+import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.ERROR;
+import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.PENDING;
+import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.RETRYABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,15 +26,15 @@ import static org.mockito.Mockito.verify;
 import modelengine.fit.waterflow.exceptions.WaterflowException;
 import modelengine.fit.waterflow.entity.FlowErrorInfo;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowCacheService;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMemoRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
 import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream.Publisher;
+import modelengine.fit.waterflow.flowsengine.domain.flows.streams.Publisher;
 import modelengine.fit.waterflow.flowsengine.domain.flows.streams.From;
 import modelengine.fit.waterflow.flowsengine.persist.po.FlowRetryPO;
 import modelengine.fitframework.broker.client.Invoker;
@@ -622,7 +622,7 @@ public abstract class FlowsDataBaseTest {
         assertNotNull(retryPO.getNextRetryTime());
         assertNull(retryPO.getLastRetryTime());
         assertEquals(retryPO.getRetryCount(), 0);
-        FitStream.Subscriber<FlowData, Object> subscriberWithException = from.getSubscriber(
+        Subscriber<FlowData, Object> subscriberWithException = from.getSubscriber(
                 contexts.get(0).getPosition());
         assertTrue(subscriberWithException.isAuto());
         assertEquals(cxtPosition, subscriberWithException.getId());

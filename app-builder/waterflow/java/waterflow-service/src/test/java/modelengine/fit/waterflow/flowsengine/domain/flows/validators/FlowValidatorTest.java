@@ -29,7 +29,7 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.even
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.jobers.FlowEchoJober;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.jobers.FlowGeneralJober;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeTriggerMode;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.FlowParser;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.Parser;
 import modelengine.fit.waterflow.flowsengine.domain.flows.validators.rules.CallbacksRule;

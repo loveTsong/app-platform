@@ -6,19 +6,19 @@
 
 package modelengine.fit.waterflow.flowsengine.biz.service;
 
+import modelengine.fit.waterflow.domain.context.FlowTrace;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.entity.OperationContext;
 import modelengine.fit.waterflow.exceptions.WaterflowException;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.entity.FlowStartDTO;
 import modelengine.fit.waterflow.entity.FlowStartInfo;
 import modelengine.fit.waterflow.entity.JoberErrorInfo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowTrace;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.QueryFlowContextPersistRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
 import modelengine.fit.waterflow.flowsengine.persist.po.FlowContextPO;
 import modelengine.fit.waterflow.flowsengine.utils.FlowUtil;
 import modelengine.fit.waterflow.service.FlowRuntimeService;
@@ -52,9 +52,9 @@ public class SingleFlowRuntimeServiceImpl implements SingleFlowRuntimeService {
     private final FlowRuntimeService flowRuntimeService;
     private final FlowTraceRepo traceRepo;
     private final QueryFlowContextPersistRepo contextRepo;
-    private final FlowContextRepo<FlowData> repo;
+    private final FlowContextRepo repo;
 
-    public SingleFlowRuntimeServiceImpl(FlowRuntimeService flowRuntimeService, FlowTraceRepo traceRepo, QueryFlowContextPersistRepo contextRepo, FlowContextRepo<FlowData> repo) {
+    public SingleFlowRuntimeServiceImpl(FlowRuntimeService flowRuntimeService, FlowTraceRepo traceRepo, QueryFlowContextPersistRepo contextRepo, FlowContextRepo repo) {
         this.flowRuntimeService = flowRuntimeService;
         this.traceRepo = traceRepo;
         this.contextRepo = contextRepo;

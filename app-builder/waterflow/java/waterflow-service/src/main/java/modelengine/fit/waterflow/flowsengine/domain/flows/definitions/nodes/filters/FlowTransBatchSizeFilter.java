@@ -6,9 +6,9 @@
 
 package modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.filters;
 
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
+import modelengine.fit.waterflow.domain.stream.operators.Operators;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.Processors;
 import modelengine.fitframework.util.CollectionUtils;
 import modelengine.fitframework.util.StringUtils;
 
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class FlowTransBatchSizeFilter extends FlowFilter {
     private static final String THRESHOLD = "threshold";
 
-    private final Processors.Filter<FlowData> batchSizeFilter = (List<FlowContext<FlowData>> contexts) -> {
+    private final Operators.Filter<FlowData> batchSizeFilter = (List<FlowContext<FlowData>> contexts) -> {
         if (CollectionUtils.isEmpty(contexts)) {
             return new ArrayList<>();
         }
@@ -43,7 +43,7 @@ public class FlowTransBatchSizeFilter extends FlowFilter {
     };
 
     @Override
-    public Processors.Filter<FlowData> filter() {
+    public Operators.Filter<FlowData> filter() {
         return batchSizeFilter;
     }
 }

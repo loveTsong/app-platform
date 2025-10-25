@@ -24,7 +24,7 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.Flow
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowStartNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowStateNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.tasks.FlowTask;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
 import modelengine.fit.waterflow.service.FlowRuntimeService;
 import modelengine.fitframework.model.RangedResultSet;
 

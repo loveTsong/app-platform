@@ -6,8 +6,8 @@
 
 package modelengine.fit.waterflow.flowsengine.biz.service.cache;
 
+import modelengine.fit.waterflow.domain.stream.reactive.Publisher;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
 import modelengine.fitframework.annotation.Component;
 
 import lombok.AllArgsConstructor;
@@ -29,7 +29,7 @@ public class FlowQueryService {
      * @param streamId stream id
      * @return water flow启动入口
      */
-    public FitStream.Publisher<FlowData> getPublisher(String streamId) {
+    public Publisher<FlowData> getPublisher(String streamId) {
         return cacheService.getPublisher(streamId);
     }
 }

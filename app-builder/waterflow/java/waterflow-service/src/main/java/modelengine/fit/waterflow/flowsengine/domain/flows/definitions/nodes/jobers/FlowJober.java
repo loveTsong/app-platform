@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.converter.FlowDataConverter;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowJoberProperties;
@@ -136,7 +136,7 @@ public abstract class FlowJober {
     /**
      * context repo
      */
-    protected FlowContextRepo<FlowData> contextRepo;
+    protected FlowContextRepo contextRepo;
 
     /**
      * 是否异步job

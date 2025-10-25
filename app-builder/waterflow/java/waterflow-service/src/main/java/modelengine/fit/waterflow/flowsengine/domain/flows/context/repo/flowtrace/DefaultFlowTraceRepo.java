@@ -6,11 +6,10 @@
 
 package modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace;
 
-import static modelengine.fit.waterflow.common.Constant.TRACE_EXCLUSIVE_STATUS_MAP;
-
 import lombok.RequiredArgsConstructor;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowTrace;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowTraceStatus;
+import modelengine.fit.waterflow.domain.context.FlowTrace;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
+import modelengine.fit.waterflow.domain.enums.FlowTraceStatus;
 import modelengine.fit.waterflow.flowsengine.persist.mapper.FlowTraceMapper;
 import modelengine.fit.waterflow.flowsengine.persist.po.FlowTracePO;
 import modelengine.fitframework.annotation.Component;
@@ -22,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static modelengine.fit.waterflow.common.Constant.TRACE_EXCLUSIVE_STATUS_MAP;
 
 /**
  * {@link FlowTraceRepo}默认实现类
@@ -82,10 +83,10 @@ public class DefaultFlowTraceRepo implements FlowTraceRepo {
         flowTraceMapper.updateStatus(traceIds, status, LocalDateTime.now(), TRACE_EXCLUSIVE_STATUS_MAP.get(status));
     }
 
-    @Override
-    public List<String> findRunningTrace(List<String> applications) {
-        return flowTraceMapper.findRunningTrace(applications);
-    }
+    // @Override
+    // public List<String> findRunningTrace(List<String> applications) {
+    //     return flowTraceMapper.findRunningTrace(applications);
+    // }
 
     @Override
     public List<FlowTrace> findTraceByIdList(List<String> traceIds) {
@@ -93,20 +94,20 @@ public class DefaultFlowTraceRepo implements FlowTraceRepo {
         return flowTracePOS.stream().map(this::serializer).collect(Collectors.toList());
     }
 
-    @Override
-    public void deleteByIdList(List<String> traceIds) {
-        if (traceIds.isEmpty()) {
-            return;
-        }
-        flowTraceMapper.deleteByIdList(traceIds);
-    }
+    // @Override
+    // public void deleteByIdList(List<String> traceIds) {
+    //     if (traceIds.isEmpty()) {
+    //         return;
+    //     }
+    //     flowTraceMapper.deleteByIdList(traceIds);
+    // }
 
-    @Override
-    public List<String> getExpiredTrace(int expiredDays, int limit) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expired = now.minusDays(expiredDays);
-        return flowTraceMapper.getExpiredTrace(expired, limit);
-    }
+    // @Override
+    // public List<String> getExpiredTrace(int expiredDays, int limit) {
+    //     LocalDateTime now = LocalDateTime.now();
+    //     LocalDateTime expired = now.minusDays(expiredDays);
+    //     return flowTraceMapper.getExpiredTrace(expired, limit);
+    // }
 
     private FlowTracePO serializer(FlowTrace flowTrace) {
         String contextPool = String.join(", ", flowTrace.getContextPool());

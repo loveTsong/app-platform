@@ -6,16 +6,19 @@
 
 package modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext;
 
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.utils.IdGenerator;
+import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.callbacks.FlowCallback;
 import modelengine.fit.waterflow.flowsengine.domain.flows.events.FlowCallbackEvent;
 import modelengine.fit.waterflow.flowsengine.domain.flows.events.FlowTaskCreatedEvent;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.IdGenerator;
 import modelengine.fitframework.annotation.Alias;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.log.Logger;
 import modelengine.fitframework.plugin.Plugin;
 import modelengine.fitframework.util.CollectionUtils;
+import modelengine.fitframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,12 +55,15 @@ public class FlowContextPersistMessenger implements FlowContextMessenger {
     }
 
     @Override
-    public <O> void sendCallback(FlowCallback callback, List<FlowContext<O>> contexts) {
+    public <O> void sendCallback(Object callback, List<FlowContext<O>> contexts) {
+        FlowCallback realCallback = ObjectUtils.cast(callback);
         if (CollectionUtils.isEmpty(contexts)) {
             log.info("Empty contexts.");
             return;
         }
         log.info("Start sending a callback event.");
-        this.plugin.runtime().publisherOfEvents().publishEvent(new FlowCallbackEvent(contexts, callback, this));
+        this.plugin.runtime()
+                .publisherOfEvents()
+                .publishEvent(new FlowCallbackEvent<FlowData>(ObjectUtils.cast(contexts), realCallback, this));
     }
 }

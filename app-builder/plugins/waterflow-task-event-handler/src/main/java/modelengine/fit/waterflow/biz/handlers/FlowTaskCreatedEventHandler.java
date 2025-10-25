@@ -16,7 +16,7 @@ import modelengine.fit.waterflow.biz.operation.OperatorFactory;
 import modelengine.fit.waterflow.biz.operation.operator.Operator;
 import modelengine.fit.waterflow.common.Constant;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowDefinitionQueryService;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;

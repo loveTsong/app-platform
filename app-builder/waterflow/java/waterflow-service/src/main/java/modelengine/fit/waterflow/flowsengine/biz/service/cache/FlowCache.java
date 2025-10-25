@@ -11,9 +11,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import modelengine.fit.waterflow.domain.stream.reactive.Publisher;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
 
 /**
  * 流程中的缓存结构
@@ -31,5 +31,5 @@ public class FlowCache {
 
     @Getter
     @Setter
-    private FitStream.Publisher<FlowData> publisher;
+    private Publisher<FlowData> publisher;
 }

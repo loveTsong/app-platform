@@ -9,10 +9,10 @@ package modelengine.fit.waterflow.flowsengine.biz.service.entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
+import modelengine.fit.waterflow.domain.stream.nodes.To;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowRetry;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.To;
 
 import java.util.List;
 

@@ -6,8 +6,8 @@
 
 package modelengine.fit.waterflow.common;
 
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowTraceStatus;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.enums.FlowTraceStatus;
 
 import java.util.Arrays;
 import java.util.Collections;

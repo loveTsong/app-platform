@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import modelengine.fit.waterflow.DatabaseBaseTest;
 import modelengine.fit.waterflow.MethodNameLoggerExtension;
 import modelengine.fit.waterflow.common.Constant;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
 import modelengine.fit.waterflow.flowsengine.persist.entity.FlowContextUpdateInfo;
 import modelengine.fit.waterflow.flowsengine.persist.po.FlowContextPO;
 

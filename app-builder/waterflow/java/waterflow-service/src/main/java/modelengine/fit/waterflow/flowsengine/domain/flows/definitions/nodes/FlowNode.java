@@ -31,24 +31,26 @@ import modelengine.fit.waterflow.entity.FlowErrorInfo;
 import modelengine.fit.waterflow.entity.JoberErrorInfo;
 import modelengine.fit.waterflow.execptions.OhscriptExecuteException;
 import modelengine.fit.waterflow.execptions.TypeNotSupportException;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.ContextErrorInfo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.callbacks.FlowCallback;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.events.FlowEvent;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.filters.FlowFilter;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.jobers.FlowJober;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.tasks.FlowTask;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStage;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeTriggerMode;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.Processors;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStage;
+import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
+import modelengine.fit.waterflow.domain.enums.FlowNodeTriggerMode;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.stream.reactive.Subscriber;
+import modelengine.fit.waterflow.domain.stream.reactive.Processor;
+import modelengine.fit.waterflow.domain.stream.reactive.Publisher;
+import modelengine.fit.waterflow.domain.stream.operators.Operators;
 import modelengine.fit.waterflow.spi.FlowExceptionService;
 import modelengine.fitframework.broker.client.BrokerClient;
 import modelengine.fitframework.broker.client.filter.route.FitableIdFilter;
@@ -138,9 +140,9 @@ public abstract class FlowNode {
     protected FlowCallback callback;
 
     /**
-     * 流程节点对应的{@link FitStream.Processor}
+     * 流程节点对应的{@link Processor}
      */
-    protected FitStream.Processor<FlowData, FlowData> processor;
+    protected Processor<FlowData, FlowData> processor;
 
     /**
      * 所属的flow definition， 后续需要提取WaterFlow结构替换，node有归属的WaterFlow
@@ -182,9 +184,9 @@ public abstract class FlowNode {
      * @param repo stream流程上下文repo
      * @param messenger stream流程事件发送器
      * @param locks 流程锁
-     * @return {@link FitStream.Processor}
+     * @return {@link Processor}
      */
-    public FitStream.Publisher<FlowData> getPublisher(String streamId, FlowContextRepo<FlowData> repo,
+    public Publisher<FlowData> getPublisher(String streamId, FlowContextRepo repo,
             FlowContextMessenger messenger, FlowLocks locks) {
         throw new WaterflowException(FLOW_NODE_OPERATOR_NOT_SUPPORT, this.metaId, this.type, "getPublisher");
     }
@@ -197,9 +199,9 @@ public abstract class FlowNode {
      * @param repo stream流程上下文repo
      * @param messenger stream流程事件发送器
      * @param locks 流程锁
-     * @return {@link FitStream.Processor}
+     * @return {@link Processor}
      */
-    public FitStream.Processor<FlowData, FlowData> getProcessor(String streamId, FlowContextRepo<FlowData> repo,
+    public Processor<FlowData, FlowData> getProcessor(String streamId, FlowContextRepo repo,
             FlowContextMessenger messenger, FlowLocks locks) {
         throw new WaterflowException(FLOW_NODE_OPERATOR_NOT_SUPPORT, this.metaId, this.type, "getProcessor");
     }
@@ -212,9 +214,9 @@ public abstract class FlowNode {
      * @param repo stream流程上下文repo
      * @param messenger stream流程事件发送器
      * @param locks 流程锁
-     * @return {@link FitStream.Subscriber}
+     * @return {@link Subscriber}
      */
-    public FitStream.Subscriber<FlowData, FlowData> getSubscriber(String streamId, FlowContextRepo<FlowData> repo,
+    public Subscriber<FlowData, FlowData> getSubscriber(String streamId, FlowContextRepo repo,
             FlowContextMessenger messenger, FlowLocks locks) {
         throw new WaterflowException(FLOW_NODE_OPERATOR_NOT_SUPPORT, this.metaId, this.type, "getSubscriber");
     }
@@ -249,7 +251,7 @@ public abstract class FlowNode {
      * @param to to
      * @param event event
      */
-    protected void subscribe(FitStream.Publisher<FlowData> from, FitStream.Subscriber<FlowData, FlowData> to,
+    protected void subscribe(Publisher<FlowData> from, Subscriber<FlowData, FlowData> to,
             FlowEvent event) {
         from.subscribe(event.getMetaId(), to);
     }
@@ -260,7 +262,7 @@ public abstract class FlowNode {
      * @param streamId streamId
      * @return Processors.Error<FlowData>
      */
-    protected Processors.Error<FlowData> errorHandler(String streamId) {
+    protected Operators.ErrorHandler<FlowData> errorHandler(String streamId) {
         return (exception, retry, flowContexts) -> {
             if (retry.isNeedRetry(exception, flowContexts)) {
                 String toBatch = flowContexts.stream()
@@ -404,10 +406,10 @@ public abstract class FlowNode {
     /**
      * 当用户给流程节点配置回调函数时，设置回调函数处理机制
      *
-     * @param subscriber {@link FitStream.Subscriber} 表示流程节点内的subscriber
+     * @param subscriber {@link Subscriber} 表示流程节点内的subscriber
      * @param messenger {@link FlowContextMessenger} 表示stream流程事件发送器
      */
-    protected void setCallback(FitStream.Subscriber<FlowData, FlowData> subscriber, FlowContextMessenger messenger) {
+    protected void setCallback(Subscriber<FlowData, FlowData> subscriber, FlowContextMessenger messenger) {
         subscriber.onComplete(c -> {
             List<FlowContext<FlowData>> flowContexts = c.getAll();
             try {
@@ -427,10 +429,10 @@ public abstract class FlowNode {
     /**
      * 跟踪回调节点执行前后的数据
      *
-     * @param subscriber {@link FitStream.Subscriber} 表示流程节点内的subscriber
+     * @param subscriber {@link Subscriber} 表示流程节点内的subscriber
      * @param messenger {@link FlowContextMessenger} 表示stream流程事件发送器
      */
-    protected void setGlobalTrace(FitStream.Subscriber<FlowData, FlowData> subscriber, FlowContextMessenger messenger) {
+    protected void setGlobalTrace(Subscriber<FlowData, FlowData> subscriber, FlowContextMessenger messenger) {
         subscriber.onGlobalBefore(c -> Optional.ofNullable(parentFlow.getCallback())
                 .ifPresent(callback -> doGlobalTrace(c.getAll(), FlowNodeStage.BEFORE, messenger, callback)));
 
@@ -466,9 +468,9 @@ public abstract class FlowNode {
         return cast(this.parentFlow.getProperties().get(key));
     }
 
-    private FitStream.Publisher<FlowData> getFrom(String streamId, FlowContextRepo<FlowData> repo,
+    private Publisher<FlowData> getFrom(String streamId, FlowContextRepo repo,
             FlowContextMessenger messenger, FlowLocks locks) {
-        FitStream.Publisher<FlowData> publisher;
+        Publisher<FlowData> publisher;
         if (this.belongTo(FlowNodeType.START)) {
             publisher = this.getPublisher(streamId, repo, messenger, locks);
         } else {
@@ -477,9 +479,9 @@ public abstract class FlowNode {
         return publisher;
     }
 
-    private FitStream.Subscriber<FlowData, FlowData> getTo(String streamId, FlowContextRepo<FlowData> repo,
+    private Subscriber<FlowData, FlowData> getTo(String streamId, FlowContextRepo repo,
             FlowContextMessenger messenger, FlowLocks locks, FlowNode toNode) {
-        FitStream.Subscriber<FlowData, FlowData> subscriber;
+        Subscriber<FlowData, FlowData> subscriber;
         if (toNode.belongTo(FlowNodeType.END)) {
             subscriber = toNode.getSubscriber(streamId, repo, messenger, locks);
         } else {
@@ -517,7 +519,7 @@ public abstract class FlowNode {
      */
     @Getter
     public static class FlowEnv {
-        private final FlowContextRepo<FlowData> repo;
+        private final FlowContextRepo repo;
 
         private final FlowContextMessenger messenger;
 
@@ -530,7 +532,7 @@ public abstract class FlowNode {
          * @param messenger {@link FlowContextMessenger}stream流程事件发送器
          * @param locks 流程锁
          */
-        public FlowEnv(FlowContextRepo<FlowData> repo, FlowContextMessenger messenger, FlowLocks locks) {
+        public FlowEnv(FlowContextRepo repo, FlowContextMessenger messenger, FlowLocks locks) {
             this.repo = repo;
             this.messenger = messenger;
             this.locks = locks;

@@ -6,6 +6,8 @@
 
 package modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock;
 
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocksMemo;
 import modelengine.fit.waterflow.spi.lock.DistributedLockProvider;
 import modelengine.fitframework.annotation.Alias;
 import modelengine.fitframework.annotation.Component;
@@ -22,7 +24,7 @@ import java.util.concurrent.locks.Lock;
  */
 @Component
 @Alias("flowLocksDatabase")
-public class FlowLocksImpl implements FlowLocks {
+public class FlowLocksImpl extends FlowLocksMemo {
     private final DistributedLockProvider distributedLockProvider;
 
     public FlowLocksImpl(@Value("${distributed-lock-provider}") String providerAlias, BeanContainer beanContainer)
@@ -39,7 +41,7 @@ public class FlowLocksImpl implements FlowLocks {
      * @return {@link Lock} 锁对象
      */
     @Override
-    public Lock getDistributedLock(String key) {
+    public Lock getDistributeLock(String key) {
         return distributedLockProvider.get(key);
     }
 }

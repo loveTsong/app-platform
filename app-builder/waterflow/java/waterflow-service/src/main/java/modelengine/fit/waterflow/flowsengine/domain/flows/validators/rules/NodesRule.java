@@ -12,7 +12,8 @@ import static modelengine.fitframework.util.ObjectUtils.cast;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
+import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeRuleType;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.inspection.Validation;
 
@@ -55,7 +56,7 @@ public class NodesRule implements FlowRule {
         Optional.ofNullable(flowNode.getTaskFilter())
                 .ifPresent(flowFilter -> Optional.ofNullable(flowFilter.getFilterType().getFilterRule())
                         .ifPresent((filterRule) -> filterRule.apply(flowFilter)));
-        Optional.ofNullable(flowNode.getType().getNodeRule()).ifPresent(nodeRule -> nodeRule.apply(flowNode));
+        Optional.ofNullable(FlowNodeRuleType.getRule(flowNode.getType())).ifPresent(nodeRule -> nodeRule.apply(flowNode));
         String flowContext = cast(flowNode.getProperties().get("flowContext"));
         Optional.ofNullable(flowContext).ifPresent(this::checkFlowContext);
     }

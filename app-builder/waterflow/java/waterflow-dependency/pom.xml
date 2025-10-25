@@ -86,7 +86,7 @@
                 <version>${waterflow.core.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.fitframework.fel</groupId>
+                <groupId>org.fitframework.waterflow</groupId>
                 <artifactId>waterflow-core</artifactId>
                 <version>${waterflow.core.version}</version>
             </dependency>

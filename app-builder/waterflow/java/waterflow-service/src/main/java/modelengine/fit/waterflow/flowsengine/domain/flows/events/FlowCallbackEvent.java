@@ -7,7 +7,7 @@
 package modelengine.fit.waterflow.flowsengine.domain.flows.events;
 
 import lombok.Getter;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.callbacks.FlowCallback;
 import modelengine.fitframework.event.Event;
 

@@ -12,13 +12,15 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 import lombok.AllArgsConstructor;
+import modelengine.fit.waterflow.domain.stream.reactive.Publisher;
+import modelengine.fit.waterflow.domain.stream.reactive.Subscriber;
+import modelengine.fit.waterflow.domain.stream.reactive.Subscription;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.FlowDefinitionRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
 import modelengine.fitframework.annotation.Component;
 import modelengine.fitframework.log.Logger;
 
@@ -73,9 +75,9 @@ public class FlowCacheService {
      * 根据流程版本获取water flow
      *
      * @param streamId 流程版本
-     * @return {@link FitStream.Publisher} water flow
+     * @return {@link Publisher} water flow
      */
-    public FitStream.Publisher<FlowData> getPublisher(String streamId) {
+    public Publisher<FlowData> getPublisher(String streamId) {
         FlowCache flowCache = Optional.ofNullable(getFlowCacheByStreamId(streamId)).orElse(new FlowCache());
         return flowCache.getPublisher();
     }
@@ -86,7 +88,7 @@ public class FlowCacheService {
             if (definition == null) {
                 return null;
             }
-            FitStream.Publisher<FlowData> publisher = definition.convertToFlow(contextRepo, contextMessenger, locks);
+            Publisher<FlowData> publisher = definition.convertToFlow(contextRepo, contextMessenger, locks);
             Set<String> toIds = new HashSet<>();
             buildNodeInfoMap(toIds, publisher, 1);
             LOG.info("[WaterFlows::putPublisher] put new publisher only if not exists, "
@@ -96,18 +98,18 @@ public class FlowCacheService {
         });
     }
 
-    private void buildNodeInfoMap(Set<String> toIds, FitStream.Publisher publisher, int order) {
+    private void buildNodeInfoMap(Set<String> toIds, Publisher publisher, int order) {
         toIds.add(publisher.getId());
-        List<FitStream.Subscription> subscriptions = publisher.getSubscriptions();
+        List<Subscription> subscriptions = publisher.getSubscriptions();
         subscriptions.forEach(subscription -> {
-            FitStream.Subscriber to = subscription.getTo();
+            Subscriber to = subscription.getTo();
             LOG.info("buildNodeInfo, nodeId: {}, order:{}", to.getId(), order);
             if (toIds.contains(to.getId())) {
                 return;
             }
             to.setOrder(order);
-            if (to instanceof FitStream.Publisher) {
-                buildNodeInfoMap(toIds, (FitStream.Publisher) to, order + 1);
+            if (to instanceof Publisher) {
+                buildNodeInfoMap(toIds, (Publisher) to, order + 1);
             }
         });
     }

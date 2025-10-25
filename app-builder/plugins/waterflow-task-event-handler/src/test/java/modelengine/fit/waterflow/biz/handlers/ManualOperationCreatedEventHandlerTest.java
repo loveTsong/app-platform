@@ -7,7 +7,7 @@
 package modelengine.fit.waterflow.biz.handlers;
 
 import static modelengine.fit.waterflow.biz.operation.OperatorFactory.getOperator;
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeStatus.ARCHIVED;
+import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.ARCHIVED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,7 +25,7 @@ import modelengine.fit.waterflow.biz.operation.operator.SmartFormOperator;
 import modelengine.fit.waterflow.common.Constant;
 import modelengine.fit.waterflow.flowsengine.biz.service.TraceOwnerService;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowDefinitionQueryService;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowContext;
+import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.FlowRetryRepo;
@@ -39,7 +39,7 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.conv
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.converter.MappingNodeType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.tasks.FlowTask;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.FlowDefinitionRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowTaskType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.events.FlowTaskCreatedEvent;
 import modelengine.fit.waterflow.flowsengine.persist.mapper.FlowContextMapper;

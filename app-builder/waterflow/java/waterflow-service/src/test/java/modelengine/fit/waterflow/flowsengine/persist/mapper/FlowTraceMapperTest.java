@@ -9,7 +9,7 @@ package modelengine.fit.waterflow.flowsengine.persist.mapper;
 import modelengine.fit.waterflow.DatabaseBaseTest;
 import modelengine.fit.waterflow.MethodNameLoggerExtension;
 import modelengine.fit.waterflow.common.Constant;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowTraceStatus;
+import modelengine.fit.waterflow.domain.enums.FlowTraceStatus;
 import modelengine.fit.waterflow.flowsengine.persist.po.FlowTracePO;
 
 import org.junit.jupiter.api.Assertions;

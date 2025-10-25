@@ -7,9 +7,9 @@
 package modelengine.fit.waterflow.flowsengine.domain.flows.validators.rules.nodes;
 
 import modelengine.fit.waterflow.ErrorCodes;
+import modelengine.fit.waterflow.domain.enums.FlowNodeTriggerMode;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeTriggerMode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.validators.rules.Rules;
 
 /**

@@ -16,18 +16,18 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import modelengine.fit.waterflow.domain.stream.reactive.Publisher;
 import modelengine.fit.waterflow.exceptions.WaterflowException;
 import modelengine.fit.waterflow.common.Constant;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextMessenger;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocks;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
+import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.callbacks.FlowCallback;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.events.FlowEvent;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowDefinitionStatus;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeType;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.FitStream;
+import modelengine.fit.waterflow.domain.enums.FlowNodeType;
 import modelengine.fitframework.util.StringUtils;
 
 import java.util.Collections;
@@ -163,9 +163,9 @@ public class FlowDefinition {
      * @param repo 流程实例运行时的处理context的repo
      * @param messenger 流程实例运行时的处理context的messenger
      * @param locks 流程实例运行时的处理context的锁
-     * @return {@link FitStream.Publisher < FlowData >} stream流程
+     * @return {@link Publisher < FlowData >} stream流程
      */
-    public FitStream.Publisher<FlowData> convertToFlow(FlowContextRepo<FlowData> repo, FlowContextMessenger messenger,
+    public Publisher<FlowData> convertToFlow(FlowContextRepo repo, FlowContextMessenger messenger,
             FlowLocks locks) {
         String streamId = this.getStreamId();
         Lock lock = locks.getLocalLock(streamId);

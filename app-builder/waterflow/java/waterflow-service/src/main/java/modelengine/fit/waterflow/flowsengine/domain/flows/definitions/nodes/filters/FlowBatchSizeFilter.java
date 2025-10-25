@@ -6,8 +6,8 @@
 
 package modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.filters;
 
+import modelengine.fit.waterflow.domain.stream.operators.Operators;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.Processors;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -22,7 +22,7 @@ public class FlowBatchSizeFilter extends FlowFilter {
     private static final String THRESHOLD = "threshold";
 
     @Override
-    public Processors.Filter<FlowData> filter() {
+    public Operators.Filter<FlowData> filter() {
         int threshold = Integer.parseInt(this.getProperties().get(THRESHOLD));
         return (inputs) -> {
             inputs.forEach(input -> {
