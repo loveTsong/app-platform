@@ -34,6 +34,7 @@ import modelengine.fitframework.broker.client.filter.route.FitableIdFilter;
 import modelengine.fitframework.event.EventHandler;
 import modelengine.fitframework.exception.FitException;
 import modelengine.fitframework.log.Logger;
+import modelengine.fitframework.util.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -85,16 +86,17 @@ public class FlowTaskCreatedEventHandler implements EventHandler<FlowTaskCreated
         FlowNode flowNode = flowDefinition.getFlowNode(eventData.getNodeId());
         FlowTask task = flowNode.getTask();
         String type = task.getTaskType().getSource();
-        List<FlowContext<FlowData>> convertedContexts = this.convertFlowContext(contexts, task, flowNode);
-        flowContextPersistRepo.save(convertedContexts);
-        Operator operator = OperatorFactory.getOperator(type, brokerClient);
+        List<FlowContext<FlowData>> convertedContexts = null;
         try {
+            convertedContexts = this.convertFlowContext(contexts, task, flowNode);
+            flowContextPersistRepo.save(convertedContexts);
+            Operator operator = OperatorFactory.getOperator(type, brokerClient);
             operator.operate(convertedContexts, task);
         } catch (FitException e) {
             for (String fitableId : task.getExceptionFitables()) {
                 this.brokerClient.getRouter(FlowExceptionService.class, HANDLE_EXCEPTION_GENERICABLE)
                         .route(new FitableIdFilter(fitableId))
-                        .invoke(eventData.getNodeId(), getFlowData(convertedContexts), e.getMessage());
+                        .invoke(eventData.getNodeId(), getFlowData(ObjectUtils.nullIf(convertedContexts, contexts)), e.getMessage());
             }
             log.error("Caught a throwable during the task handling. TaskId is {}. Caused by {}", task.getTaskId(),
                     e.getMessage());

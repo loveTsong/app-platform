@@ -9,6 +9,7 @@ package modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcont
 import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.domain.context.FlowSession;
 import modelengine.fit.waterflow.domain.context.FlowTrace;
+import modelengine.fit.waterflow.domain.context.Window;
 import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMemoRepo;
 import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
 import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
@@ -42,6 +43,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static modelengine.fit.waterflow.ErrorCodes.ENTITY_NOT_FOUND;
@@ -80,6 +82,8 @@ public class FlowContextPersistRepo implements FlowContextRepo {
 
     private final Integer defaultLimitation;
 
+    private final Map<String, FlowSession> contextSessions = new ConcurrentHashMap<>();
+
     public FlowContextPersistRepo(FlowContextMapper contextMapper, FlowTraceRepo traceRepo, FlowRetryRepo retryRepo,
             TraceOwnerService traceOwnerService, @Value("${modelengine.limit}") Integer limit,
             @Value("${modelengine.useLimit}") boolean hasUseLimit,
@@ -114,10 +118,10 @@ public class FlowContextPersistRepo implements FlowContextRepo {
     @Override
     public <T> List<FlowContext<T>> getContextsByPosition(String streamId, List<String> posIds, String status) {
         List<String> traceIds = this.traceOwnerService.getTraces();
-        if (traceIds.isEmpty()) {
-            log.warn("There is no trace owned.");
-            return Collections.emptyList();
-        }
+        // if (traceIds.isEmpty()) {
+        //     log.warn("There is no trace owned.");
+        //     return Collections.emptyList();
+        // }
         List<FlowContextPO> pos = contextMapper.findByPositions(streamId, posIds, status, traceIds);
         if (pos.isEmpty()) {
             log.info("[getContextsByPosition] Empty contexts. traceIds={}, pos={}.", StringUtils.join(',', traceIds),
@@ -187,6 +191,7 @@ public class FlowContextPersistRepo implements FlowContextRepo {
 
     @Override
     public <T> void updateToSent(List<FlowContext<T>> contexts) {
+        contexts.forEach(context -> this.contextSessions.remove(context.getId()));
         contextMapper.updateToSent(contexts.stream().map(IdGenerator::getId).collect(Collectors.toList()));
     }
 
@@ -220,6 +225,10 @@ public class FlowContextPersistRepo implements FlowContextRepo {
         String toBatch = contexts.get(0).getToBatch();
         LocalDateTime updateAt = LocalDateTime.now();
         LocalDateTime archivedAt = status.equals(FlowNodeStatus.ARCHIVED.toString()) ? updateAt : null;
+        if (FlowNodeStatus.ARCHIVED.toString().equals(status) || FlowNodeStatus.ERROR.toString().equals(status)
+                || FlowNodeStatus.TERMINATE.toString().equals(status)) {
+            contexts.forEach(context -> this.contextSessions.remove(context.getId()));
+        }
         contextMapper.updateStatusAndPosition(ids,
                 new FlowContextUpdateInfo(toBatch, status, position, updateAt, archivedAt),
                 CONTEXT_EXCLUSIVE_STATUS_MAP.get(status));
@@ -230,6 +239,7 @@ public class FlowContextPersistRepo implements FlowContextRepo {
         List<FlowContext<String>> contexts = getContextsByTrace(traceIds.get(0));
         List<String> ids = contexts.stream().map(IdGenerator::getId).collect(Collectors.toList());
         String status = FlowTraceStatus.TERMINATE.toString();
+        contexts.forEach(context -> this.contextSessions.remove(context.getId()));
         contextMapper.updateStatusAndPosition(ids,
                 new FlowContextUpdateInfo(status, contexts.get(0).getPosition(), LocalDateTime.now(), null),
                 CONTEXT_EXCLUSIVE_STATUS_MAP.get(status));
@@ -324,10 +334,10 @@ public class FlowContextPersistRepo implements FlowContextRepo {
             Operators.Filter<T> filter) {
         List<FlowContextPO> pos;
         List<String> traces = this.traceOwnerService.getTraces();
-        if (traces.isEmpty()) {
-            log.warn("There is no trace owned.");
-            return Collections.emptyList();
-        }
+        // if (traces.isEmpty()) {
+        //     log.warn("There is no trace owned.");
+        //     return Collections.emptyList();
+        // }
         if (useLimit) {
             pos = contextMapper.findSomeBySubscriptions(streamId, subscriptions, FlowNodeStatus.PENDING.toString(),
                     traces, defaultLimitation);
@@ -450,6 +460,9 @@ public class FlowContextPersistRepo implements FlowContextRepo {
             .archivedAt(context.getArchivedAt())
             .build();
         context.getData().getBusinessData().remove(PASS_DATA);
+        if (context.getSession() != null) {
+            this.contextSessions.putIfAbsent(context.getId(), context.getSession());
+        }
         return result;
     }
 
@@ -462,7 +475,7 @@ public class FlowContextPersistRepo implements FlowContextRepo {
                 po.getPositionId(),
                 po.getParallel(),
                 po.getParallelMode(),
-                new FlowSession(po.getTransId()),
+                this.getFlowSession(po),
                 LocalDateTime.now());
         convertOthers(po, context);
         return context;
@@ -477,10 +490,20 @@ public class FlowContextPersistRepo implements FlowContextRepo {
                 po.getPositionId(),
                 po.getParallel(),
                 po.getParallelMode(),
-                new FlowSession(po.getTransId()),
+                this.getFlowSession(po),
                 LocalDateTime.now());
         convertOthers(po, context);
         return context;
+    }
+
+    private FlowSession getFlowSession(FlowContextPO po) {
+        return this.contextSessions.computeIfAbsent(po.getContextId(), __ -> {
+            FlowSession newSession = new FlowSession(po.getTransId());
+            Window window = newSession.begin();
+            window.createToken();
+            window.complete();
+            return newSession;
+        });
     }
 
     private Set<String> convertTraceIds(FlowContextPO po) {
@@ -494,7 +517,6 @@ public class FlowContextPersistRepo implements FlowContextRepo {
     private <T> void convertOthers(FlowContextPO po, FlowContext<T> context) {
         context.setId(po.getContextId());
         context.setPrevious(po.getPrevious());
-        context.setSession(new FlowSession(po.getTransId()));
         context.setStatus(FlowNodeStatus.valueOf(po.getStatus()));
         context.batchId(po.getBatchId());
         context.toBatch(po.getToBatch());

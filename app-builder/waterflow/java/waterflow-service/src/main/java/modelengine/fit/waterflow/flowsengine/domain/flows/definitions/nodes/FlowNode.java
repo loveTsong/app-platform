@@ -509,6 +509,7 @@ public abstract class FlowNode {
         flowContext.getData().getContextData().put("nodeName", this.getName());
         flowContext.getData().getContextData().put("nodeType", getType().getCode());
         flowContext.getData().getContextData().put("flowTraceIds", new ArrayList<>(flowContext.getTraceId()));
+        flowContext.getData().getContextData().put("contextId", flowContext.getId());
     }
 
     /**
