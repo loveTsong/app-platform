@@ -94,20 +94,20 @@ public class DefaultFlowTraceRepo implements FlowTraceRepo {
         return flowTracePOS.stream().map(this::serializer).collect(Collectors.toList());
     }
 
-    // @Override
-    // public void deleteByIdList(List<String> traceIds) {
-    //     if (traceIds.isEmpty()) {
-    //         return;
-    //     }
-    //     flowTraceMapper.deleteByIdList(traceIds);
-    // }
+    @Override
+    public void deleteByIdList(List<String> traceIds) {
+        if (traceIds.isEmpty()) {
+            return;
+        }
+        flowTraceMapper.deleteByIdList(traceIds);
+    }
 
-    // @Override
-    // public List<String> getExpiredTrace(int expiredDays, int limit) {
-    //     LocalDateTime now = LocalDateTime.now();
-    //     LocalDateTime expired = now.minusDays(expiredDays);
-    //     return flowTraceMapper.getExpiredTrace(expired, limit);
-    // }
+    @Override
+    public List<String> getExpiredTrace(int expiredDays, int limit) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expired = now.minusDays(expiredDays);
+        return flowTraceMapper.getExpiredTrace(expired, limit);
+    }
 
     private FlowTracePO serializer(FlowTrace flowTrace) {
         String contextPool = String.join(", ", flowTrace.getContextPool());

@@ -814,6 +814,10 @@ public class FlowContextPersistRepo implements FlowContextRepo {
 
         LocalDateTime updateAt = LocalDateTime.now();
         LocalDateTime archivedAt = status.equals(FlowNodeStatus.ARCHIVED.toString()) ? updateAt : null;
+        if (FlowNodeStatus.ARCHIVED.toString().equals(status) || FlowNodeStatus.ERROR.toString().equals(status)
+                || FlowNodeStatus.TERMINATE.toString().equals(status)) {
+            contexts.forEach(context -> this.contextSessions.remove(context.getId()));
+        }
 
         contextMapper.updateProcessStatus(ids,
                 new FlowContextUpdateInfo(toBatch, status, position, updateAt, archivedAt),
@@ -890,11 +894,7 @@ public class FlowContextPersistRepo implements FlowContextRepo {
         return contextMapper.getTransIdByTrace(traceId);
     }
 
-    /**
-     * 根据链路唯一标识列表删除对应的上下文数据。
-     *
-     * @param traceIdList 表示链路唯一标识列表的 {@link List}{@code <}{@link String}{@code >}。
-     */
+    @Override
     public void deleteByTraceIdList(List<String> traceIdList) {
         if (CollectionUtils.isEmpty(traceIdList)) {
             return;
