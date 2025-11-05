@@ -83,10 +83,10 @@ public class DefaultFlowTraceRepo implements FlowTraceRepo {
         flowTraceMapper.updateStatus(traceIds, status, LocalDateTime.now(), TRACE_EXCLUSIVE_STATUS_MAP.get(status));
     }
 
-    // @Override
-    // public List<String> findRunningTrace(List<String> applications) {
-    //     return flowTraceMapper.findRunningTrace(applications);
-    // }
+    @Override
+    public List<String> findRunningTrace(List<String> applications) {
+        return flowTraceMapper.findRunningTrace(applications);
+    }
 
     @Override
     public List<FlowTrace> findTraceByIdList(List<String> traceIds) {

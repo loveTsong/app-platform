@@ -224,10 +224,10 @@
         <foreach item="subscription" collection="subscriptions" open="(" separator="," close=")">
             #{subscription}
         </foreach>
-<!--        AND trace_id in-->
-<!--        <foreach item="item" index="index" collection="traceIds" open="(" separator="," close=")">-->
-<!--            #{item}-->
-<!--        </foreach>-->
+        AND trace_id in
+        <foreach item="item" index="index" collection="traceIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
         AND status = #{status}
     </select>
 
@@ -242,10 +242,10 @@
         <foreach item="subscription" collection="subscriptions" open="(" separator="," close=")">
             #{subscription}
         </foreach>
-<!--        AND trace_id in-->
-<!--        <foreach item="item" index="index" collection="traceIds" open="(" separator="," close=")">-->
-<!--            #{item}-->
-<!--        </foreach>-->
+        AND trace_id in
+        <foreach item="item" index="index" collection="traceIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
         AND status = #{status}
         LIMIT #{limit}
     </select>

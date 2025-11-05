@@ -6,6 +6,7 @@
 
 package modelengine.fit.waterflow.flowsengine.biz.service;
 
+import modelengine.fit.waterflow.domain.context.TraceOwner;
 import modelengine.fit.waterflow.domain.stream.nodes.From;
 import modelengine.fit.waterflow.domain.stream.nodes.To;
 import modelengine.fit.waterflow.domain.utils.IdGenerator;
@@ -76,14 +77,14 @@ public class FlowRetryService {
 
     private final FlowLocks locks;
 
-    private final TraceOwnerService traceOwnerService;
+    private final TraceOwner traceOwnerService;
 
     private final FlowDefinitionQueryService definitionQueryService;
 
     private final FlowQueryService flowQueryService;
 
     public FlowRetryService(FlowContextRepo repo, FlowRetryRepo retryRepo, FlowLocks locks,
-                            TraceOwnerService traceOwnerService, FlowDefinitionQueryService definitionQueryService,
+                            TraceOwner traceOwnerService, FlowDefinitionQueryService definitionQueryService,
                             FlowQueryService flowQueryService) {
         this.repo = repo;
         this.retryRepo = retryRepo;

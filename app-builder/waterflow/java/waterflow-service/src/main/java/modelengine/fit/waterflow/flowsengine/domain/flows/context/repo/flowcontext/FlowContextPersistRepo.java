@@ -9,6 +9,7 @@ package modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcont
 import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.domain.context.FlowSession;
 import modelengine.fit.waterflow.domain.context.FlowTrace;
+import modelengine.fit.waterflow.domain.context.TraceOwner;
 import modelengine.fit.waterflow.domain.context.Window;
 import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMemoRepo;
 import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
@@ -18,7 +19,6 @@ import modelengine.fit.waterflow.domain.enums.FlowTraceStatus;
 import modelengine.fit.waterflow.domain.stream.operators.Operators;
 import modelengine.fit.waterflow.domain.utils.IdGenerator;
 import modelengine.fit.waterflow.exceptions.WaterflowException;
-import modelengine.fit.waterflow.flowsengine.biz.service.TraceOwnerService;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowRetry;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.FlowRetryRepo;
@@ -74,7 +74,7 @@ public class FlowContextPersistRepo implements FlowContextRepo {
 
     private final FlowRetryRepo retryRepo;
 
-    private final TraceOwnerService traceOwnerService;
+    private final TraceOwner traceOwner;
 
     private final boolean useLimit;
 
@@ -85,10 +85,10 @@ public class FlowContextPersistRepo implements FlowContextRepo {
     private final Map<String, FlowSession> contextSessions = new ConcurrentHashMap<>();
 
     public FlowContextPersistRepo(FlowContextMapper contextMapper, FlowTraceRepo traceRepo, FlowRetryRepo retryRepo,
-            TraceOwnerService traceOwnerService, @Value("${modelengine.limit}") Integer limit,
+            TraceOwner traceOwner, @Value("${modelengine.limit}") Integer limit,
             @Value("${modelengine.useLimit}") boolean hasUseLimit,
             @Value("${jane.flowsEngine.retry.maxCount}") long maxRetryCount) {
-        this.traceOwnerService = traceOwnerService;
+        this.traceOwner = traceOwner;
         this.useLimit = hasUseLimit;
         this.contextMapper = contextMapper;
         this.traceRepo = traceRepo;
@@ -117,11 +117,11 @@ public class FlowContextPersistRepo implements FlowContextRepo {
 
     @Override
     public <T> List<FlowContext<T>> getContextsByPosition(String streamId, List<String> posIds, String status) {
-        List<String> traceIds = this.traceOwnerService.getTraces();
-        // if (traceIds.isEmpty()) {
-        //     log.warn("There is no trace owned.");
-        //     return Collections.emptyList();
-        // }
+        List<String> traceIds = this.traceOwner.getTraces();
+        if (traceIds.isEmpty()) {
+            log.warn("There is no trace owned.");
+            return Collections.emptyList();
+        }
         List<FlowContextPO> pos = contextMapper.findByPositions(streamId, posIds, status, traceIds);
         if (pos.isEmpty()) {
             log.info("[getContextsByPosition] Empty contexts. traceIds={}, pos={}.", StringUtils.join(',', traceIds),
@@ -167,10 +167,18 @@ public class FlowContextPersistRepo implements FlowContextRepo {
         FlowContextPO flowContextPO = contextMapper.find(flowContexts.get(0).getId());
         List<FlowContextPO> flowContextPOS = flowContexts.stream()
                 .map(ObjectUtils::<FlowContext<FlowData>>cast)
+                .peek(context -> {
+                    if (flowContextPO == null) {
+                        if (context.getStatus().isRunningStatus()) {
+                            this.contextSessions.putIfAbsent(context.getId(), context.getSession());
+                        }
+                    }
+                })
                 .map(this::serializer)
                 .collect(Collectors.toList());
         if (flowContextPO == null) {
             contextMapper.batchCreate(flowContextPOS);
+
         } else {
             batchUpdate(flowContextPOS);
         }
@@ -307,7 +315,7 @@ public class FlowContextPersistRepo implements FlowContextRepo {
     @Override
     public <T> List<FlowContext<T>> requestMappingContext(String streamId, List<String> subscriptions,
             Map<String, Integer> sessions) {
-        List<String> traces = this.traceOwnerService.getTraces();
+        List<String> traces = this.traceOwner.getTraces();
         List<FlowContextPO> pos = contextMapper.findBySubscriptions(streamId, subscriptions,
                 FlowNodeStatus.PENDING.toString(), traces);
         List<FlowContext<FlowData>> all = pos.stream().map(this::serializer).toList();
@@ -333,11 +341,11 @@ public class FlowContextPersistRepo implements FlowContextRepo {
     public <T> List<FlowContext<T>> requestProducingContext(String streamId, List<String> subscriptions,
             Operators.Filter<T> filter) {
         List<FlowContextPO> pos;
-        List<String> traces = this.traceOwnerService.getTraces();
-        // if (traces.isEmpty()) {
-        //     log.warn("There is no trace owned.");
-        //     return Collections.emptyList();
-        // }
+        List<String> traces = this.traceOwner.getTraces();
+        if (traces.isEmpty()) {
+            log.warn("There is no trace owned.");
+            return Collections.emptyList();
+        }
         if (useLimit) {
             pos = contextMapper.findSomeBySubscriptions(streamId, subscriptions, FlowNodeStatus.PENDING.toString(),
                     traces, defaultLimitation);
@@ -460,9 +468,6 @@ public class FlowContextPersistRepo implements FlowContextRepo {
             .archivedAt(context.getArchivedAt())
             .build();
         context.getData().getBusinessData().remove(PASS_DATA);
-        if (context.getSession() != null) {
-            this.contextSessions.putIfAbsent(context.getId(), context.getSession());
-        }
         return result;
     }
 
@@ -747,13 +752,9 @@ public class FlowContextPersistRepo implements FlowContextRepo {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * getTraceOwnerService
-     *
-     * @return TraceOwnerService
-     */
-    public TraceOwnerService getTraceOwnerService() {
-        return traceOwnerService;
+    @Override
+    public TraceOwner getTraceOwner() {
+        return traceOwner;
     }
 
     @Override
