@@ -549,15 +549,26 @@ public class FlowContextPersistRepo implements FlowContextRepo {
     }
 
     /**
+     * 根据traceId查询所有上下文
+     *
+     * @param traceId traceId
+     * @return 上下文集合
+     */
+    public List<FlowContext<FlowData>> findByTraceId(String traceId) {
+        return contextMapper.findByTraceId(traceId).stream().map(this::serializer).collect(Collectors.toList());
+    }
+
+    /**
      * 根据traceId查询所有错误上下文
      *
      * @param traceId traceId
      * @return 错误上下文集合
      */
-    public List<FlowContext<FlowData>> findErrorContextsByTraceId(String traceId) {
+    public <T> List<FlowContext<T>> findErrorContextsByTraceId(String traceId) {
         return contextMapper.findErrorContextByTraceId(traceId)
                 .stream()
                 .map(this::serializer)
+                .map(ObjectUtils::<FlowContext<T>>cast)
                 .collect(Collectors.toList());
     }
 

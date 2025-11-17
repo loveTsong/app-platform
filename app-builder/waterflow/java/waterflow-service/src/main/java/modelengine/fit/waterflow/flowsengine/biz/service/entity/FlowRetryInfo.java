@@ -30,5 +30,5 @@ public class FlowRetryInfo {
 
     private To<FlowData, Object> to;
 
-    private List<FlowContext<String>> flowContexts;
+    private List<FlowContext<FlowData>> flowContexts;
 }

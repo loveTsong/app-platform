@@ -8,7 +8,7 @@ package modelengine.fit.waterflow.flowsengine.biz.service;
 
 import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.READY;
 import static modelengine.fit.waterflow.domain.enums.FlowNodeStatus.RETRYABLE;
-import static modelengine.fit.waterflow.flowsengine.domain.flows.enums.ProcessType.PROCESS;
+import static modelengine.fit.waterflow.domain.enums.ProcessType.PROCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,6 +24,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import modelengine.fit.waterflow.domain.context.FlowSession;
+import modelengine.fit.waterflow.domain.context.FlowTrace;
+import modelengine.fit.waterflow.domain.context.TraceOwner;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
+import modelengine.fit.waterflow.domain.stream.nodes.From;
+import modelengine.fit.waterflow.domain.stream.nodes.To;
 import modelengine.fit.waterflow.entity.OperationContext;
 import modelengine.fit.ohscript.util.UUIDUtil;
 import modelengine.fit.waterflow.DatabaseBaseTest;
@@ -35,18 +41,14 @@ import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowQueryService;
 import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowRetry;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowTrace;
 import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
 import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.QueryFlowContextPersistRepo;
 import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.FlowRetryRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.FlowDefinitionRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.FlowParser;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.Parser;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.From;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.To;
 import modelengine.fit.waterflow.flowsengine.persist.mapper.FlowContextMapper;
 import modelengine.fit.waterflow.flowsengine.persist.po.FlowContextPO;
 import modelengine.fitframework.broker.client.BrokerClient;
@@ -108,7 +110,7 @@ class FlowRetryTest extends DatabaseBaseTest {
 
         private FlowDefinitionRepo flowDefinitionRepo;
 
-        private TraceOwnerService traceOwnerService;
+        private TraceOwner traceOwnerService;
 
         private FlowDefinitionQueryService definitionQueryService;
 
@@ -127,7 +129,7 @@ class FlowRetryTest extends DatabaseBaseTest {
             flowTraceRepo = Mockito.mock(FlowTraceRepo.class);
             flowRetryRepo = Mockito.mock(FlowRetryRepo.class);
             flowLocks = Mockito.mock(FlowLocks.class);
-            traceOwnerService = Mockito.mock(TraceOwnerService.class);
+            traceOwnerService = Mockito.mock(TraceOwner.class);
 
             flowRetryService = new FlowRetryService(flowContextRepo, flowRetryRepo, flowLocks, traceOwnerService,
                     definitionQueryService, flowQueryService);
@@ -155,15 +157,15 @@ class FlowRetryTest extends DatabaseBaseTest {
             String position = "position";
             String streamId = "streamId";
             FlowContext<FlowData> context = new FlowContext(streamId, "rootId", null,
-                Collections.singleton(traceId), position);
+                Collections.singleton(traceId), position, new FlowSession());
             context.setStatus(RETRYABLE);
             context.toBatch(toBatchId);
             List<FlowContext<FlowData>> contexts = Collections.singletonList(context);
 
-            when(flowContextRepo.getWithoutFlowDataByToBatch(Collections.singletonList(toBatchId)))
+            when(flowContextRepo.<FlowData>getByToBatch(Collections.singletonList(toBatchId)))
                 .thenReturn(contexts)
                 .thenReturn(Collections.emptyList());
-            when(flowContextRepo.getByToBatch(Collections.singletonList(toBatchId))).thenReturn(contexts);
+            when(flowContextRepo.<FlowData>getByToBatch(Collections.singletonList(toBatchId))).thenReturn(contexts);
 
             // getFlowRetryInfo中查询重试关联节点使用
             From<FlowData> from = Mockito.mock(From.class);
@@ -171,13 +173,13 @@ class FlowRetryTest extends DatabaseBaseTest {
             when(from.getSubscriber(position)).thenReturn(to);
             To.ProcessMode processMode = Mockito.mock(To.ProcessMode.class);
             when(to.getProcessMode()).thenReturn(processMode);
-            doNothing().when(processMode).submit(same(to), anyList());
+            doNothing().when(processMode).submit(same(PROCESS), same(to), anyList(), any());
             // 执行retryByToBatch和updateRetryStatus使用锁
             Lock lock = Mockito.mock(Lock.class);
-            when(flowLocks.getDistributedLock("retry-toBatchId")).thenReturn(lock);
+            when(flowLocks.getDistributeLock("retry-toBatchId")).thenReturn(lock);
             when(lock.tryLock()).thenReturn(true);
-            when(flowLocks.getDistributedLock(
-                flowLocks.streamNodeLockKey(streamId, position, PROCESS.toString()))).thenReturn(lock);
+            when(flowLocks.getDistributeLock(
+                flowLocks.lockKey(streamId, position, PROCESS.toString()))).thenReturn(lock);
             when(traceOwnerService.isAnyOwn(any())).thenReturn(true);
             when(traceOwnerService.getTraces()).thenReturn(Collections.singletonList(traceId));
             sleepUtilMockedStatic.when(() -> SleepUtil.sleep(anyInt())).then((invocation -> null));
@@ -186,8 +188,8 @@ class FlowRetryTest extends DatabaseBaseTest {
 
             verify(traceOwnerService, times(1)).isAnyOwn(any());
             verify(flowRetryRepo, times(2)).filterByNextRetryTime(any(), anyList());
-            verify(flowContextRepo, times(2)).getWithoutFlowDataByToBatch(any());
-            verify(flowContextRepo, times(1)).getByToBatch(any());
+            verify(flowContextRepo, times(2)).<FlowData>getByToBatch(any());
+            verify(flowContextRepo, times(1)).<FlowData>getByToBatch(any());
             verify(lock, times(1)).tryLock();
             verify(lock, times(2)).unlock();
             verify(flowRetryRepo, times(1)).updateRetryRecord(any());
@@ -203,14 +205,14 @@ class FlowRetryTest extends DatabaseBaseTest {
         public void testRetryTaskSuccess() {
             FlowRetry flowRetry = new FlowRetry("toBatchId", "toBatch", LocalDateTime.now(), null, 0, 1);
             FlowContext<FlowData> context = new FlowContext("streamId", "rootId", null,
-                    Collections.singleton("traceId"), "position");
+                    Collections.singleton("traceId"), "position", new FlowSession());
             context.setStatus(RETRYABLE);
             context.toBatch("toBatchId");
             List<FlowContext<FlowData>> contexts = Collections.singletonList(context);
 
             this.retry(flowRetry, contexts, context);
 
-            List<FlowContext<FlowData>> ans = flowContextRepo.findByTraceId("traceId");
+            List<FlowContext<FlowData>> ans = flowContextRepo.getContextsByTrace("traceId");
             Assertions.assertEquals(1, ans.size());
             Assertions.assertEquals(contexts.get(0), ans.get(0));
             assertNotNull(flowRetry.getLastRetryTime());
@@ -222,13 +224,13 @@ class FlowRetryTest extends DatabaseBaseTest {
         public void testEmptyContextRetryTaskSuccess() {
             FlowRetry flowRetry = new FlowRetry("toBatchId", "toBatch", LocalDateTime.now(), null, 0, 1);
             FlowContext<FlowData> context = new FlowContext("streamId", "rootId", null,
-                    Collections.singleton("traceId"), "position");
+                    Collections.singleton("traceId"), "position", new FlowSession());
             context.setStatus(RETRYABLE);
             context.toBatch("toBatchId");
             List<FlowContext<FlowData>> contexts = Collections.singletonList(context);
             when(flowRetryRepo.filterByNextRetryTime(any(), anyList()))
                     .thenReturn(new ArrayList<>());
-            when(flowContextRepo.getWithoutFlowDataByToBatch(anyList())).thenReturn(contexts);
+            when(flowContextRepo.<FlowData>getByToBatch(anyList())).thenReturn(contexts);
             when(traceOwnerService.isAnyOwn(anySet())).thenReturn(true);
 
             flowRetryService.popRetryTask();
@@ -239,7 +241,7 @@ class FlowRetryTest extends DatabaseBaseTest {
         private void retry(FlowRetry flowRetry, List<FlowContext<FlowData>> contexts, FlowContext<FlowData> context) {
             when(flowRetryRepo.filterByNextRetryTime(any(), anyList()))
                     .thenReturn(Collections.singletonList(flowRetry)).thenReturn(new ArrayList<>());
-            when(flowContextRepo.getWithoutFlowDataByToBatch(anyList())).thenReturn(contexts);
+            when(flowContextRepo.<FlowData>getByToBatch(anyList())).thenReturn(contexts);
             when(traceOwnerService.isAnyOwn(anySet())).thenReturn(true);
 
             From<FlowData> from = Mockito.mock(From.class);
@@ -247,20 +249,20 @@ class FlowRetryTest extends DatabaseBaseTest {
             when(from.getSubscriber("position")).thenReturn(to);
 
             Lock lock = Mockito.mock(Lock.class);
-            when(flowLocks.getDistributedLock("retry-toBatchId")).thenReturn(lock);
+            when(flowLocks.getDistributeLock("retry-toBatchId")).thenReturn(lock);
             when(lock.tryLock()).thenReturn(true);
 
             when(traceOwnerService.getTraces()).thenReturn(new ArrayList<>(context.getTraceId()));
             Lock nodeLock = Mockito.mock(Lock.class);
-            when(flowLocks.getDistributedLock(flowLocks.streamNodeLockKey(any(), any(), anyString())))
+            when(flowLocks.getDistributeLock(flowLocks.lockKey(any(), any(), anyString())))
                     .thenReturn(nodeLock);
 
-            when(flowContextRepo.getByToBatch(anyList())).thenReturn(contexts);
+            when(flowContextRepo.<FlowData>getByToBatch(anyList())).thenReturn(contexts);
             when(flowRetryRepo.updateRetryRecord(anyList())).thenReturn(1);
 
             when(to.getProcessMode()).thenReturn(To.ProcessMode.PRODUCING);
 
-            when(flowContextRepo.findByTraceId("traceId")).thenReturn(contexts);
+            when(flowContextRepo.<FlowData>getContextsByTrace("traceId")).thenReturn(contexts);
 
             flowRetryService.popRetryTask();
         }

@@ -23,13 +23,13 @@ import modelengine.fit.jober.common.exceptions.JobberException;
 import modelengine.fit.waterflow.biz.operation.OperatorFactory;
 import modelengine.fit.waterflow.biz.operation.operator.SmartFormOperator;
 import modelengine.fit.waterflow.common.Constant;
-import modelengine.fit.waterflow.flowsengine.biz.service.TraceOwnerService;
+import modelengine.fit.waterflow.domain.context.TraceOwner;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowDefinitionQueryService;
 import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.FlowRetryRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowStateNode;
@@ -65,8 +65,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * {@link FlowTaskCreatedEventHandler} 测试类
@@ -143,7 +141,7 @@ class ManualOperationCreatedEventHandlerTest {
 
         private BrokerClient brokerClient;
 
-        private TraceOwnerService traceOwnerService;
+        private TraceOwner traceOwnerService;
 
         private FlowDefinitionQueryService definitionQueryService;
 
@@ -152,7 +150,7 @@ class ManualOperationCreatedEventHandlerTest {
             flowContextMapper = Mockito.mock(FlowContextMapper.class);
             flowTraceRepo = Mockito.mock(FlowTraceRepo.class);
             flowRetryRepo = Mockito.mock(FlowRetryRepo.class);
-            traceOwnerService = Mockito.mock(TraceOwnerService.class);
+            traceOwnerService = Mockito.mock(TraceOwner.class);
             Integer defaultLimitation = 5;
             boolean useLimit = false;
             FlowContextPersistRepo flowContextPersistRepo = new FlowContextPersistRepo(flowContextMapper, flowTraceRepo,

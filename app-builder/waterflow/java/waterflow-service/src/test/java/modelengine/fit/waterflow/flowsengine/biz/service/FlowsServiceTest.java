@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import modelengine.fit.jade.waterflow.entity.FlowDefinitionResult;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.entity.OperationContext;
 import modelengine.fit.waterflow.exceptions.WaterflowException;
 import modelengine.fit.jade.waterflow.service.FlowDefinitionService;
@@ -25,7 +26,6 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowconte
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.DefaultFlowRetryRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.FlowRetryRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.DefaultFlowTraceRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.DefaultFlowDefinitionRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.QueryFlowDefinitionRepo;

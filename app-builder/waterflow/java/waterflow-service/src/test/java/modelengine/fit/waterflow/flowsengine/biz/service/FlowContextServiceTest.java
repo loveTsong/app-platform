@@ -16,6 +16,10 @@ import static org.mockito.Mockito.when;
 
 import com.alibaba.fastjson.JSON;
 
+import modelengine.fit.waterflow.domain.context.FlowTrace;
+import modelengine.fit.waterflow.domain.context.TraceOwner;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocksMemo;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.entity.OperationContext;
 import modelengine.fit.ohscript.util.UUIDUtil;
 import modelengine.fit.waterflow.DatabaseBaseTest;
@@ -28,17 +32,13 @@ import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowQueryService;
 import modelengine.fit.waterflow.flowsengine.biz.service.entity.FlowsErrorInfo;
 import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowOfferId;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowTrace;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistMessenger;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.QueryFlowContextPersistRepo;
 import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocksMemo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.DefaultFlowRetryRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.FlowRetryRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.DefaultFlowTraceRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.DefaultFlowDefinitionRepo;
 import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
@@ -97,7 +97,7 @@ class FlowContextServiceTest extends DatabaseBaseTest {
 
     private static InvalidDistributedLockNotify notify = Mockito.mock(InvalidDistributedLockNotify.class);
 
-    private static final TraceOwnerService traceOwnerService = new DefaultTraceOwnerService(locks, notify);
+    private static final TraceOwner traceOwnerService = new DefaultTraceOwnerService(locks, notify);
 
     private FlowTraceMapper traceMapper;
 

@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import modelengine.fit.waterflow.FlowsDataBaseTest;
 import modelengine.fit.waterflow.MethodNameLoggerExtension;
+import modelengine.fit.waterflow.domain.enums.FlowNodeTriggerMode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowConditionNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
@@ -25,7 +26,6 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowCallbackType
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowDefinitionStatus;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowJoberProperties;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowJoberType;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeTriggerMode;
 import modelengine.fit.waterflow.domain.enums.FlowNodeType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowTaskType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.nodes.events.EventParser;

@@ -24,7 +24,6 @@ import java.time.Instant;
  * @author 李哲峰
  * @since 2024/2/2
  */
-@Component
 public class RetrySchedulerEngine implements FitablesRegisteredObserver {
     private static final Logger log = Logger.get(RetrySchedulerEngine.class);
 

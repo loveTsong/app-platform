@@ -20,23 +20,26 @@ import modelengine.fit.waterflow.DatabaseBaseTest;
 import modelengine.fit.waterflow.FlowsDataBaseTest;
 import modelengine.fit.waterflow.MethodNameLoggerExtension;
 import modelengine.fit.waterflow.common.utils.SleepUtil;
+import modelengine.fit.waterflow.domain.context.FlowSession;
+import modelengine.fit.waterflow.domain.context.FlowTrace;
+import modelengine.fit.waterflow.domain.context.TraceOwner;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocksMemo;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
+import modelengine.fit.waterflow.domain.stream.nodes.From;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowDefinitionQueryService;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowQueryService;
 import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowRetry;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowTrace;
 import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMessenger;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistMessenger;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistRepo;
 import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.QueryFlowContextPersistRepo;
 import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocksMemo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.DefaultFlowRetryRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.FlowRetryRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.DefaultFlowTraceRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.DefaultFlowDefinitionRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.FlowDefinitionRepo;
@@ -44,7 +47,6 @@ import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
 import modelengine.fit.waterflow.domain.enums.FlowTraceStatus;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.FlowParser;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.Parser;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.From;
 import modelengine.fit.waterflow.flowsengine.persist.mapper.FitableUsageMapper;
 import modelengine.fit.waterflow.flowsengine.persist.mapper.FlowContextMapper;
 import modelengine.fit.waterflow.flowsengine.persist.mapper.FlowDefinitionMapper;
@@ -75,7 +77,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 /**
- * {@link FlowContextsService} 对应测试类（数据库环境）
+ * {@link FlowRuntimeService} 对应测试类（数据库环境）
  *
  * @author 李哲峰
  * @since 2024/2/7
@@ -100,7 +102,7 @@ public class FlowContextsServicePersistTest extends DatabaseBaseTest {
 
     private static final FlowDefinitionMapper FLOW_DEFINITION_MAPPER;
 
-    private static final FlowContextRepo<FlowData> REPO;
+    private static final FlowContextRepo REPO;
 
     private static final QueryFlowContextPersistRepo QUERY_REPO;
 
@@ -114,7 +116,7 @@ public class FlowContextsServicePersistTest extends DatabaseBaseTest {
 
     private static final FlowRetryService FLOW_RETRY_SERVICE;
 
-    private static final TraceOwnerService traceOwnerService;
+    private static final TraceOwner traceOwnerService;
 
     private static FlowDefinitionQueryService definitionQueryService;
 
@@ -129,7 +131,7 @@ public class FlowContextsServicePersistTest extends DatabaseBaseTest {
         FLOW_RETRY_REPO = new DefaultFlowRetryRepo(FLOW_RETRY_MAPPER);
         FLOW_DEFINITION_MAPPER = sqlSessionManager.getMapper(FlowDefinitionMapper.class);
         Integer defaultLimitation = 5;
-        traceOwnerService = Mockito.mock(TraceOwnerService.class);
+        traceOwnerService = Mockito.mock(TraceOwner.class);
         boolean useLimit = false;
         REPO = new FlowContextPersistRepo(FLOW_CONTEXT_MAPPER, TRACE_REPO, FLOW_RETRY_REPO, traceOwnerService,
                 defaultLimitation, useLimit, 1);
@@ -238,7 +240,7 @@ public class FlowContextsServicePersistTest extends DatabaseBaseTest {
                     .contextData(new HashMap<>())
                     .build();
             FlowContext<FlowData> context = new FlowContext(streamId, "rootId", flowData,
-                    Collections.singleton(traceId), position);
+                    Collections.singleton(traceId), position, new FlowSession());
             context.setStatus(status);
             context.toBatch(toBatch);
             return context;

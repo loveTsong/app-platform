@@ -15,6 +15,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import modelengine.fit.waterflow.domain.context.FlowSession;
+import modelengine.fit.waterflow.domain.context.TraceOwner;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
+import modelengine.fit.waterflow.domain.stream.nodes.From;
 import modelengine.fit.waterflow.entity.OperationContext;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.MethodNameLoggerExtension;
@@ -26,7 +30,6 @@ import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextMess
 import modelengine.fit.waterflow.domain.context.repo.flowcontext.FlowContextRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.QueryFlowContextPersistRepo;
 import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.FlowNode;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.converter.FlowDataConverter;
@@ -34,7 +37,6 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.jobe
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.FlowDefinitionRepo;
 import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
 import modelengine.fit.waterflow.domain.enums.FlowNodeType;
-import modelengine.fit.waterflow.flowsengine.domain.flows.streams.From;
 import modelengine.fit.waterflow.domain.stream.nodes.Node;
 
 import modelengine.fit.waterflow.service.FlowRuntimeService;
@@ -61,7 +63,7 @@ import java.util.stream.Collectors;
  */
 @ExtendWith(MethodNameLoggerExtension.class)
 public class FlowContextsServiceNoDbTest {
-    private TraceOwnerService traceOwnerService;
+    private TraceOwner traceOwnerService;
     private FlowRuntimeService flowRuntimeService;
 
     private FlowDefinitionRepo flowDefinitionRepo;
@@ -74,7 +76,7 @@ public class FlowContextsServiceNoDbTest {
 
     @BeforeEach
     void setUp() {
-        traceOwnerService = Mockito.mock(TraceOwnerService.class);
+        traceOwnerService = Mockito.mock(TraceOwner.class);
         flowDefinitionRepo = Mockito.mock(FlowDefinitionRepo.class);
         QueryFlowContextPersistRepo queryFlowContextPersistRepo = Mockito.mock(QueryFlowContextPersistRepo.class);
         flowDefinitionRepo = Mockito.mock(FlowDefinitionRepo.class);
@@ -123,7 +125,7 @@ public class FlowContextsServiceNoDbTest {
                 .contextData(new HashMap<>())
                 .build();
         FlowContext<FlowData> flowContext = new FlowContext<>("streamId", "rootId", flowData,
-                Collections.singleton("traceId"), "nodeId");
+                Collections.singleton("traceId"), "nodeId", new FlowSession());
         flowContext.setPosition(position);
         flowContext.setStatus(FlowNodeStatus.PROCESSING);
         Map<String, Object> newBusinessData = new HashMap<>();
@@ -131,7 +133,7 @@ public class FlowContextsServiceNoDbTest {
         secondLayerMap.put("secondLayerK1", "secondLayerV1");
         newBusinessData.put("k1", "v1");
         newBusinessData.put("k2", secondLayerMap);
-        when(flowContextRepo.getByIds(anyList())).thenReturn(Collections.singletonList(flowContext));
+        when(flowContextRepo.<FlowData>getByIds(anyList())).thenReturn(Collections.singletonList(flowContext));
         flowRuntimeService.resumeAsyncJob(
                 Collections.singletonList(flowContext.getId()), Collections.singletonList(newBusinessData),
                 getOperationContext());
@@ -173,20 +175,20 @@ public class FlowContextsServiceNoDbTest {
                 .businessData(new HashMap<>())
                 .contextData(new HashMap<>())
                 .build();
-        FlowContext<FlowData> flowContext = new FlowContext<>("streamId", "rootId", flowData, Collections.singleton("traceId"), "nodeId");
+        FlowContext<FlowData> flowContext = new FlowContext<>("streamId", "rootId", flowData, Collections.singleton("traceId"), "nodeId", new FlowSession());
         flowContext.setPosition(position);
         flowContext.setStatus(FlowNodeStatus.PROCESSING);
         Map<String, Object> newBusinessData = new HashMap<>();
         newBusinessData.put("k1", "v1");
         WaterflowParamException expectException = new WaterflowParamException(INPUT_PARAM_IS_INVALID, "xxx");
         List<FlowContext<FlowData>> expectContexts = Collections.singletonList(flowContext);
-        when(flowContextRepo.getByIds(anyList())).thenReturn(expectContexts);
+        when(flowContextRepo.<FlowData>getByIds(anyList())).thenReturn(expectContexts);
         flowRuntimeService.failAsyncJob(expectContexts.stream().map(FlowContext::getId).collect(Collectors.toList()),
                 expectException, getOperationContext());
 
         ArgumentCaptor<List> captorPre = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<Exception> captorException = ArgumentCaptor.forClass(Exception.class);
-        verify(node).setFailed(captorPre.capture(), captorException.capture());
+        verify(node).fail(captorException.capture(), captorPre.capture());
         List<FlowContext<FlowData>> pre = captorPre.getValue();
         Exception exception = captorException.getValue();
         Assertions.assertEquals(expectContexts, pre);

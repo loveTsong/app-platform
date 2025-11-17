@@ -9,8 +9,10 @@ package modelengine.fit.waterflow.flowsengine.biz.service.scheduletasks;
 import modelengine.fit.waterflow.DatabaseBaseTest;
 import modelengine.fit.waterflow.FlowsDataBaseTest;
 import modelengine.fit.waterflow.MethodNameLoggerExtension;
+import modelengine.fit.waterflow.domain.context.TraceOwner;
+import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocksMemo;
+import modelengine.fit.waterflow.domain.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.biz.service.DefaultTraceOwnerService;
-import modelengine.fit.waterflow.flowsengine.biz.service.TraceOwnerService;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowDefinitionQueryService;
 import modelengine.fit.waterflow.flowsengine.biz.service.cache.FlowQueryService;
 import modelengine.fit.waterflow.flowsengine.domain.flows.FlowsTestUtil;
@@ -19,11 +21,9 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistMessenger;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowcontext.FlowContextPersistRepo;
 import modelengine.fit.waterflow.domain.context.repo.flowlock.FlowLocks;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowlock.FlowLocksMemo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.DefaultFlowRetryRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowretry.FlowRetryRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.DefaultFlowTraceRepo;
-import modelengine.fit.waterflow.flowsengine.domain.flows.context.repo.flowtrace.FlowTraceRepo;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.FlowDefinition;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.repo.DefaultFlowDefinitionRepo;
 import modelengine.fit.waterflow.domain.enums.FlowNodeStatus;
@@ -69,7 +69,7 @@ class RestartContextScheduleTest extends DatabaseBaseTest {
 
     private FlowContextPersistMessenger messenger = new FlowContextPersistMessenger(null);
 
-    private TraceOwnerService traceOwnerService;
+    private TraceOwner traceOwnerService;
 
     private FlowTraceMapper traceMapper;
 

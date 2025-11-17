@@ -6,6 +6,7 @@
 
 package modelengine.fit.waterflow.flowsengine.biz.service;
 
+import modelengine.fit.waterflow.domain.context.FlowSession;
 import modelengine.fit.waterflow.entity.JoberErrorInfo;
 import modelengine.fit.waterflow.domain.context.FlowContext;
 import modelengine.fit.waterflow.flowsengine.domain.flows.context.FlowData;
@@ -41,7 +42,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class FlowInstanceServiceImplTest {
     @Mock
-    private FlowContextRepo<FlowData> flowContextRepo;
+    private FlowContextRepo flowContextRepo;
 
     @Mock
     private FlowRuntimeService flowRuntimeService;
@@ -59,9 +60,9 @@ class FlowInstanceServiceImplTest {
     void shouldCallContextServiceWhenResumeAsyncJobGivenValidContextId() {
         String flowDataId = "contextId1";
         FlowContext<FlowData> context =
-                new FlowContext<>("streamId", "rootId", new FlowData(), Collections.singleton("traceId"), "nodeId");
+                new FlowContext<>("streamId", "rootId", new FlowData(), Collections.singleton("traceId"), "nodeId", new FlowSession());
         context.setStatus(FlowNodeStatus.PROCESSING);
-        when(flowContextRepo.getById(flowDataId)).thenReturn(context);
+        when(flowContextRepo.<FlowData>getById(flowDataId)).thenReturn(context);
         doNothing().when(flowRuntimeService).resumeAsyncJob(anyList(), anyList(), any());
         HashMap<String, Object> businessData = new HashMap<>();
         singleFlowRuntimeService.resumeAsyncJob(flowDataId, businessData, null);
@@ -74,9 +75,9 @@ class FlowInstanceServiceImplTest {
     void shouldDoNothingWhenResumeAsyncJobGivenWrongContextStatus() {
         String flowDataId = "contextId1";
         FlowContext<FlowData> context =
-                new FlowContext<>("streamId", "rootId", new FlowData(), Collections.singleton("traceId"), "nodeId");
+                new FlowContext<>("streamId", "rootId", new FlowData(), Collections.singleton("traceId"), "nodeId", new FlowSession());
         context.setStatus(FlowNodeStatus.ARCHIVED);
-        when(flowContextRepo.getById(flowDataId)).thenReturn(context);
+        when(flowContextRepo.<FlowData>getById(flowDataId)).thenReturn(context);
         singleFlowRuntimeService.resumeAsyncJob(flowDataId, new HashMap<>(), null);
         verify(flowContextRepo, times(1)).getById(flowDataId);
         verify(flowRuntimeService, times(0)).resumeAsyncJob(any(), any(), any());
@@ -86,9 +87,9 @@ class FlowInstanceServiceImplTest {
     void shouldCallContextServiceWhenFailAsyncJobGivenValidContextId() {
         String flowDataId = "contextId1";
         FlowContext<FlowData> context =
-                new FlowContext<>("streamId", "rootId", new FlowData(), Collections.singleton("traceId"), "nodeId");
+                new FlowContext<>("streamId", "rootId", new FlowData(), Collections.singleton("traceId"), "nodeId", new FlowSession());
         context.setStatus(FlowNodeStatus.PROCESSING);
-        when(flowContextRepo.getById(flowDataId)).thenReturn(context);
+        when(flowContextRepo.<FlowData>getById(flowDataId)).thenReturn(context);
         doNothing().when(flowRuntimeService).failAsyncJob(anyList(), any(), any());
         singleFlowRuntimeService.failAsyncJob(flowDataId, new JoberErrorInfo("error"), null);
         verify(flowContextRepo, times(1)).getById(eq(flowDataId));
@@ -100,9 +101,9 @@ class FlowInstanceServiceImplTest {
     void shouldDoNothingWhenFailAsyncJobGivenWrongContextStatus() {
         String flowDataId = "contextId1";
         FlowContext<FlowData> context =
-                new FlowContext<>("streamId", "rootId", new FlowData(), Collections.singleton("traceId"), "nodeId");
+                new FlowContext<>("streamId", "rootId", new FlowData(), Collections.singleton("traceId"), "nodeId", new FlowSession());
         context.setStatus(FlowNodeStatus.ARCHIVED);
-        when(flowContextRepo.getById(flowDataId)).thenReturn(context);
+        when(flowContextRepo.<FlowData>getById(flowDataId)).thenReturn(context);
         singleFlowRuntimeService.resumeAsyncJob(flowDataId,
                 new HashMap<>(), null);
         verify(flowContextRepo, times(1)).getById(flowDataId);

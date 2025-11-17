@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-
+import modelengine.fit.waterflow.domain.enums.FlowNodeTriggerMode;
 import modelengine.fit.waterflow.exceptions.WaterflowParamException;
 import modelengine.fit.waterflow.FlowsDataBaseTest;
 import modelengine.fit.waterflow.MethodNameLoggerExtension;
@@ -28,7 +28,6 @@ import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.call
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.events.FlowEvent;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.jobers.FlowEchoJober;
 import modelengine.fit.waterflow.flowsengine.domain.flows.definitions.nodes.jobers.FlowGeneralJober;
-import modelengine.fit.waterflow.flowsengine.domain.flows.enums.FlowNodeTriggerMode;
 import modelengine.fit.waterflow.domain.enums.FlowNodeType;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.FlowParser;
 import modelengine.fit.waterflow.flowsengine.domain.flows.parsers.Parser;
